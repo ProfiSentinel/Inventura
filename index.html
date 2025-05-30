@@ -27,7 +27,7 @@
     }
     input {
       text-align: center;
-      width: 45px;
+      width: 60px;
       font-size: 13px;
       padding: 0.2rem;
     }
@@ -87,15 +87,15 @@
       row.innerHTML = `
         <td><strong>${item}</strong></td>
         <td>
-          <input type="number" id="${item}-pack" value="0"><br>
+          <input type="number" step="any" id="${item}-pack" placeholder=""><br>
           <small id="${item}-pack-total">0</small>
         </td>
         <td>
-          <input type="number" id="${item}-bag" value="0"><br>
+          <input type="number" step="any" id="${item}-bag" placeholder=""><br>
           <small id="${item}-bag-total">0</small>
         </td>
         <td>
-          <input type="number" id="${item}-pcs" value="0"><br>
+          <input type="number" step="any" id="${item}-pcs" placeholder=""><br>
           <small id="${item}-pcs-total">0</small>
         </td>
         <td><button onclick="updateItem('${item}')">Vložit</button></td>
@@ -104,9 +104,9 @@
     });
 
     function updateItem(item) {
-      const pack = parseInt(document.getElementById(`${item}-pack`).value) || 0;
-      const bag = parseInt(document.getElementById(`${item}-bag`).value) || 0;
-      const pcs = parseInt(document.getElementById(`${item}-pcs`).value) || 0;
+      const pack = parseFloat(document.getElementById(`${item}-pack`).value) || 0;
+      const bag = parseFloat(document.getElementById(`${item}-bag`).value) || 0;
+      const pcs = parseFloat(document.getElementById(`${item}-pcs`).value) || 0;
 
       inventory[item].pack += pack;
       inventory[item].bag += bag;
@@ -115,9 +115,9 @@
       localStorage.setItem("inventoryData", JSON.stringify(inventory));
       updateDisplay(item);
 
-      document.getElementById(`${item}-pack`).value = "0";
-      document.getElementById(`${item}-bag`).value = "0";
-      document.getElementById(`${item}-pcs`).value = "0";
+      document.getElementById(`${item}-pack`).value = "";
+      document.getElementById(`${item}-bag`).value = "";
+      document.getElementById(`${item}-pcs`).value = "";
     }
 
     function updateDisplay(item) {
