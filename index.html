@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventura</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; padding: 1rem; background: #faf8ed; }
+    .header, .row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .row input[type="number"] { width: 4rem; text-align: center; }
+    .item-name { width: 6rem; font-weight: bold; }
+    .column { display: flex; flex-direction: column; align-items: center; }
+    .total { font-size: 0.9rem; margin-top: 0.2rem; }
+    button { padding: 0.4rem 1rem; font-weight: bold; }
+    .label { width: 4rem; text-align: center; font-weight: bold; }
+    #resetBtn { background: #e74c3c; color: white; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+
+  <h2>Inventura</h2>
+
+  <div class="header">
+    <div class="item-name"></div>
+    <div class="label">Balení</div>
+    <div class="label">Sáčky</div>
+    <div class="label">Kusy</div>
+    <div class="label"></div>
+  </div>
+
+  <div id="inventoryContainer"></div>
+
+  <button id="resetBtn" onclick="resetInventory()">🔄 RESET</button>
+
+  <script>
+    const itemList = ["Rajčata", "Papriky", "Okurky"];
+    let inventory = JSON.parse(localStorage.getItem("inventoryData")) || {};
+
+    itemList.forEach(item => {
+      if (!inventory[item]) {
+        inventory[item] = { pack: 0, bag: 0, pcs: 0 };
+      }
+    });
+
+    const container = document.getElementById("inventoryContainer");
+
+    itemList.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div class="item-name">${item}</div>
+        <div class="column">
+          <input type="number" value="0" id="${item}-pack">
+          <div class="total" id="${item}-pack-total">0</div>
+        </div>
+        <div class="column">
+          <input type="number" value="0" id="${item}-bag">
+          <div class="total" id="${item}-bag-total">0</div>
+        </div>
+        <div class="column">
+          <input type="number" value="0" id="${item}-pcs">
+          <div class="total" id="${item}-pcs-total">0</div>
+        </div>
+        <button onclick="updateItem('${item}')">Vložit</button>
+      `;
+      container.appendChild(row);
+    });
+
+    function updateItem(item) {
+      const pack = parseInt(document.getElementById(`${item}-pack`).value) || 0;
+      const bag = parseInt(document.getElementById(`${item}-bag`).value) || 0;
+      const pcs = parseInt(document.getElementById(`${item}-pcs`).value) || 0;
+
+      inventory[item].pack += pack;
+      inventory[item].bag += bag;
+      inventory[item].pcs += pcs;
+
+      localStorage.setItem("inventoryData", JSON.stringify(inventory));
+      updateDisplay(item);
+
+      document.getElementById(`${item}-pack`).value = "0";
+      document.getElementById(`${item}-bag`).value = "0";
+      document.getElementById(`${item}-pcs`).value = "0";
+    }
+
+    function updateDisplay(item) {
+      document.getElementById(`${item}-pack-total`).textContent = inventory[item].pack;
+      document.getElementById(`${item}-bag-total`).textContent = inventory[item].bag;
+      document.getElementById(`${item}-pcs-total`).textContent = inventory[item].pcs;
+    }
+
+    function resetInventory() {
+      if (confirm("Opravdu chceš vymazat všechny počty?")) {
+        itemList.forEach(item => {
+          inventory[item] = { pack: 0, bag: 0, pcs: 0 };
+          updateDisplay(item);
+        });
+        localStorage.setItem("inventoryData", JSON.stringify(inventory));
+      }
+    }
+
+    itemList.forEach(updateDisplay);
+  </script>
+
+</body>
+</html>
