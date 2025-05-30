@@ -3,32 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <title>Inventura</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 1rem; background: #faf8ed; }
-    .header, .row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
-    .row input[type="number"] { width: 4rem; text-align: center; }
-    .item-name { width: 6rem; font-weight: bold; }
-    .column { display: flex; flex-direction: column; align-items: center; }
-    .total { font-size: 0.9rem; margin-top: 0.2rem; }
-    button { padding: 0.4rem 1rem; font-weight: bold; }
-    .label { width: 4rem; text-align: center; font-weight: bold; }
-    #resetBtn { background: #e74c3c; color: white; margin-top: 1rem; }
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      background: #faf8ed;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: center;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+    }
+    input {
+      text-align: center;
+      width: 60px;
+    }
+    #resetBtn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #e74c3c;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
 
   <h2>Inventura</h2>
 
-  <div class="header">
-    <div class="item-name"></div>
-    <div class="label">Balení</div>
-    <div class="label">Sáčky</div>
-    <div class="label">Kusy</div>
-    <div class="label"></div>
-  </div>
-
-  <div id="inventoryContainer"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Položka</th>
+        <th>Balení</th>
+        <th>Sáčky</th>
+        <th>Kusy</th>
+        <th>Akce</th>
+      </tr>
+    </thead>
+    <tbody id="inventoryTable">
+      <!-- řádky budou vygenerovány -->
+    </tbody>
+  </table>
 
   <button id="resetBtn" onclick="resetInventory()">🔄 RESET</button>
 
@@ -37,33 +60,30 @@
     let inventory = JSON.parse(localStorage.getItem("inventoryData")) || {};
 
     itemList.forEach(item => {
-      if (!inventory[item]) {
-        inventory[item] = { pack: 0, bag: 0, pcs: 0 };
-      }
+      if (!inventory[item]) inventory[item] = { pack: 0, bag: 0, pcs: 0 };
     });
 
-    const container = document.getElementById("inventoryContainer");
+    const tbody = document.getElementById("inventoryTable");
 
     itemList.forEach(item => {
-      const row = document.createElement("div");
-      row.className = "row";
+      const row = document.createElement("tr");
       row.innerHTML = `
-        <div class="item-name">${item}</div>
-        <div class="column">
-          <input type="number" value="0" id="${item}-pack">
-          <div class="total" id="${item}-pack-total">0</div>
-        </div>
-        <div class="column">
-          <input type="number" value="0" id="${item}-bag">
-          <div class="total" id="${item}-bag-total">0</div>
-        </div>
-        <div class="column">
-          <input type="number" value="0" id="${item}-pcs">
-          <div class="total" id="${item}-pcs-total">0</div>
-        </div>
-        <button onclick="updateItem('${item}')">Vložit</button>
+        <td><strong>${item}</strong></td>
+        <td>
+          <input type="number" id="${item}-pack" value="0"><br>
+          <small id="${item}-pack-total">0</small>
+        </td>
+        <td>
+          <input type="number" id="${item}-bag" value="0"><br>
+          <small id="${item}-bag-total">0</small>
+        </td>
+        <td>
+          <input type="number" id="${item}-pcs" value="0"><br>
+          <small id="${item}-pcs-total">0</small>
+        </td>
+        <td><button onclick="updateItem('${item}')">Vložit</button></td>
       `;
-      container.appendChild(row);
+      tbody.appendChild(row);
     });
 
     function updateItem(item) {
@@ -90,7 +110,7 @@
     }
 
     function resetInventory() {
-      if (confirm("Opravdu chceš vymazat všechny počty?")) {
+      if (confirm("Opravdu chceš resetovat všechny položky?")) {
         itemList.forEach(item => {
           inventory[item] = { pack: 0, bag: 0, pcs: 0 };
           updateDisplay(item);
@@ -99,6 +119,7 @@
       }
     }
 
+    // Načtení při otevření
     itemList.forEach(updateDisplay);
   </script>
 
