@@ -73,10 +73,42 @@
   <button id="resetBtn" onclick="resetInventory()">🔄 RESET</button>
 
   <script>
-    const itemList = ["4:1", "10:1", "Thicker maso", "Slanina dlouha", "Value","Crispy maso", "Tortilla 20cm", "Tortilla 25cm", "Kureci Nuggety", "Nachos Triangles",
-      "Grilled kureci maso", "Stripsy", "Premiere", "Maso BUCH", "Hranolky", "Rustic", "QP", "Crispy zemle", "Maestro zemle", "BM", "RG",
-      "Rucola", "Cibule cerstva", "Cibule cervena", "Rajcata krajena", "Salat.smes", "Batavia", "Shake", "Sundae", "Str.cheddar", "Ched.platky", "Emental platky",
-      "Salat BM", "Mléko3,5%", "Muffin slan.kar."];
+    const itemList = ["4:1",
+                      "10:1",
+                      "Thicker maso",
+                      "Slanina dlouha",
+                      "Tortilla 20cm",
+                      "Tortilla 25cm",
+                      "Kureci Nuggety",
+                      "Nachos Triangles",
+                      "Grilled kureci maso",
+                      "Value maso",
+                      "McCrispy maso",
+                      "Stripsy",
+                      "Premiere",
+                      "Maso BUCH",
+                      "Hranolky",
+                      "Rustic",
+                      "QP",
+                      "Crispy zemle",
+                      "Maestro zemle",
+                      "BM",
+                      "RG",
+                      "Rucola",
+                      "Cibule cerstva",
+                      "Cibule cervena",
+                      "Rajcata krajena",
+                      "Salat.smes",
+                      "Batavia",
+                      "Shake",
+                      "Sundae",
+                      "Str.cheddar",
+                      "Ched.platky",
+                      "Emental platky",
+                      "Salat BM",
+                      "Mléko3,5%",
+                      "Muffin slan.kar."
+                     ];
     let inventory = JSON.parse(localStorage.getItem("inventoryData")) || {};
 
     itemList.forEach(item => {
