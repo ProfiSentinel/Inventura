@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Inventura PRO + Hledání</title>
+  <title>Inventura: Denní/Týdenní</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     :root {
@@ -10,168 +10,106 @@
       --add-color: #27ae60;
       --sub-color: #c0392b;
       --bg: #f4f4f4;
-      --border: #ccc;
+      --active-tab: #34495e;
+      --inactive-tab: #ecf0f1;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 0;
-      margin: 0;
-      background: var(--bg);
-      color: #333;
-      padding-bottom: 80px; /* Více místa dole kvůli tlačítku lupy */
+      padding: 0; margin: 0; background: var(--bg); color: #333; padding-bottom: 80px;
     }
 
-    /* HEADER & OVLÁDÁNÍ */
+    /* HEADER */
     header {
-      padding: 10px;
       background: #fff;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      position: sticky; top: 0; z-index: 100;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    h2 { margin: 0; font-size: 18px; color: var(--primary); }
-
-    .header-controls {
-      display: flex;
-      gap: 10px;
-    }
     
-    button {
-      border: none;
-      border-radius: 4px;
-      padding: 8px 12px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 13px;
+    /* PŘEPÍNAČ SEZNAMŮ (TABS) */
+    .list-tabs {
+      display: flex; background: #bdc3c7;
     }
-    .btn-edit { background: #3498db; color: white; }
-    .btn-reset { background: #7f8c8d; color: white; }
-
-    /* VYHLEDÁVACÍ LIŠTA (Skrytá defaultně) */
-    #searchBar {
-      display: none;
-      padding: 5px 0 10px 0;
-      border-bottom: 1px solid #eee;
+    .tab-btn {
+      flex: 1; padding: 12px; text-align: center; font-weight: bold; font-size: 14px;
+      cursor: pointer; background: var(--inactive-tab); color: #7f8c8d;
+      border: none; outline: none; transition: all 0.2s;
     }
-    .search-input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    #searchInput {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 2px solid #3498db;
-      border-radius: 6px;
-      outline: none;
-    }
-    .search-close {
-      position: absolute;
-      right: 10px;
-      background: none;
-      font-size: 18px;
-      color: #999;
-      padding: 5px;
+    .tab-btn.active {
+      background: #fff; color: var(--primary); border-bottom: 3px solid var(--primary);
     }
 
-    /* PŘEPÍNAČ REŽIMU +/- */
+    /* OVLÁDACÍ PANEL */
+    .header-main { padding: 10px; }
+    .header-top {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+    }
+    h2 { margin: 0; font-size: 18px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .header-controls { display: flex; gap: 8px; }
+    button.ctrl-btn {
+      border: none; border-radius: 4px; padding: 6px 10px; font-weight: bold; cursor: pointer; font-size: 12px; color: white;
+    }
+    .btn-edit { background: #3498db; }
+    .btn-reset { background: #95a5a6; }
+
+    /* MODE SWITCH (+/-) */
     .mode-switch {
-      display: flex;
-      width: 100%;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid #ddd;
+      display: flex; width: 100%; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; margin-top: 5px;
     }
     .mode-btn {
-      flex: 1;
-      padding: 10px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s, color 0.3s;
+      flex: 1; padding: 8px; text-align: center; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.3s, color 0.3s;
     }
     body.mode-add .mode-add-btn { background: var(--add-color); color: white; }
     body.mode-add .mode-sub-btn { background: #fff; color: #aaa; }
     body.mode-sub .mode-sub-btn { background: var(--sub-color); color: white; }
     body.mode-sub .mode-add-btn { background: #fff; color: #aaa; }
 
-    /* PLOVOUCÍ TLAČÍTKO LUPY (FAB) */
+    /* SEARCH BAR */
+    #searchBar { display: none; padding: 5px 10px 10px 10px; border-bottom: 1px solid #eee; }
+    .search-input-wrapper { position: relative; display: flex; align-items: center; }
+    #searchInput { width: 100%; padding: 8px; font-size: 16px; border: 2px solid #3498db; border-radius: 6px; outline: none; }
+    .search-close { position: absolute; right: 8px; background: none; font-size: 18px; color: #999; border: none; padding: 5px; }
+
+    /* FAB Search Button */
     .fab-search {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 56px;
-      height: 56px;
-      background-color: #3498db;
-      color: white;
-      border-radius: 50%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 24px;
-      cursor: pointer;
-      z-index: 150;
-      transition: transform 0.2s;
+      position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+      background-color: #3498db; color: white; border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center;
+      font-size: 22px; cursor: pointer; z-index: 150; transition: transform 0.2s;
     }
     .fab-search:active { transform: scale(0.9); }
 
     /* TABULKA */
     .table-container { margin-top: 5px; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    th { background: #e2e6ea; font-size: 13px; padding: 8px 2px; color: #555; }
+    th { background: #e2e6ea; font-size: 12px; padding: 8px 2px; color: #555; }
     td { padding: 8px 4px; border-bottom: 1px solid #ddd; text-align: center; vertical-align: middle; }
-    /* Skrytí řádků při hledání */
     tr.hidden { display: none; }
     
     .item-name {
-      font-size: 14px;
-      font-weight: 600;
-      text-align: left;
-      padding-left: 8px;
-      color: #2980b9;
-      overflow-wrap: break-word;
-      cursor: pointer;
-      text-decoration: underline;
-      text-decoration-style: dotted;
-      text-underline-offset: 3px;
+      font-size: 14px; font-weight: 600; text-align: left; padding-left: 8px;
+      color: #2980b9; overflow-wrap: break-word; cursor: pointer;
+      text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px;
     }
-
-    /* INPUTY */
+    
     input.qty-input {
       width: 100%; padding: 8px 0; text-align: center;
-      border: 1px solid #bbb; border-radius: 4px;
-      font-size: 18px; background: #fff; font-weight: 600;
+      border: 1px solid #bbb; border-radius: 4px; font-size: 18px; background: #fff; font-weight: 600;
     }
     input.qty-input:focus { border-color: #3498db; outline: none; background: #e8f8f5; }
 
-    /* TOTALY */
-    .total-display {
-      display: block; font-weight: 800; color: var(--primary);
-      font-size: 16px; margin-top: 4px;
-    }
+    .total-display { display: block; font-weight: 800; color: var(--primary); font-size: 15px; margin-top: 4px; }
     .updated { animation: pop 0.3s ease-in-out; color: var(--add-color); }
     @keyframes pop { 50% { transform: scale(1.4); } }
 
-    /* TLAČÍTKO OK */
-    .btn-ok { color: white; width: 100%; padding: 10px 0; border-radius: 4px; transition: background 0.2s; }
+    .btn-ok { color: white; width: 100%; padding: 10px 0; border-radius: 4px; border:none; transition: background 0.2s; font-weight: bold;}
     body.mode-add .btn-ok { background: var(--add-color); }
     body.mode-sub .btn-ok { background: var(--sub-color); }
 
     /* MODALY */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 200;
-      justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center;
     }
     .modal-content {
       background: white; padding: 20px; width: 90%; max-width: 400px;
@@ -181,8 +119,8 @@
     .modal-header { font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
     .modal-footer { margin-top: 10px; display: flex; gap: 10px; }
     textarea { flex: 1; width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; resize: none; font-family: monospace; min-height: 200px; }
-    .btn-save { background: var(--add-color); color: white; flex: 1; padding: 12px; }
-    .btn-cancel { background: #95a5a6; color: white; flex: 1; padding: 12px; }
+    .btn-save { background: var(--add-color); color: white; flex: 1; padding: 12px; border:none; border-radius:4px;}
+    .btn-cancel { background: #95a5a6; color: white; flex: 1; padding: 12px; border:none; border-radius:4px;}
 
     /* HISTORIE */
     .history-list { flex: 1; overflow-y: auto; border-top: 1px solid #eee; margin-top: 5px; }
@@ -191,35 +129,41 @@
     .hist-val.positive { color: var(--add-color); }
     .hist-val.negative { color: var(--sub-color); }
     .hist-unit { flex: 1; padding-left: 10px; color: #555; }
-    .btn-del-entry { background: #e74c3c; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; padding: 0; font-size: 12px; margin-left: 10px; }
+    .btn-del-entry { background: #e74c3c; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; padding: 0; font-size: 12px; margin-left: 10px; border:none;}
 
-    /* Sloupce */
-    col.c-name { width: 35%; }
-    col.c-input { width: 18%; }
+    col.c-name { width: 34%; }
+    col.c-input { width: 19%; }
     col.c-action { width: 11%; }
   </style>
 </head>
 <body class="mode-add">
 
   <header>
-    <div class="header-top">
-      <h2>Inventura</h2>
-      <div class="header-controls">
-        <button class="btn-edit" onclick="openEditListModal()">✏️ Seznam</button>
-        <button class="btn-reset" onclick="resetInventory()">🔄 Reset</button>
-      </div>
-    </div>
-    
-    <div id="searchBar">
-      <div class="search-input-wrapper">
-        <input type="text" id="searchInput" placeholder="Hledat položku..." autocomplete="off">
-        <button class="search-close" onclick="closeSearch()">✕</button>
-      </div>
+    <div class="list-tabs">
+      <button class="tab-btn active" id="tab-daily" onclick="switchListType('daily')">DENNÍ</button>
+      <button class="tab-btn" id="tab-weekly" onclick="switchListType('weekly')">TÝDENNÍ</button>
     </div>
 
-    <div class="mode-switch">
-      <div class="mode-btn mode-add-btn" onclick="setMode('add')">➕ PŘIDAT</div>
-      <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">➖ ODEČÍST</div>
+    <div class="header-main">
+      <div class="header-top">
+        <h2 id="pageTitle">Denní inventura</h2>
+        <div class="header-controls">
+          <button class="ctrl-btn btn-edit" onclick="openEditListModal()">✏️ Seznam</button>
+          <button class="ctrl-btn btn-reset" onclick="resetInventory()">🔄 Reset</button>
+        </div>
+      </div>
+      
+      <div id="searchBar">
+        <div class="search-input-wrapper">
+          <input type="text" id="searchInput" placeholder="Hledat položku..." autocomplete="off">
+          <button class="search-close" onclick="closeSearch()">✕</button>
+        </div>
+      </div>
+
+      <div class="mode-switch">
+        <div class="mode-btn mode-add-btn" onclick="setMode('add')">➕ PŘIDAT</div>
+        <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">➖ ODEČÍST</div>
+      </div>
     </div>
   </header>
 
@@ -249,7 +193,9 @@
 
   <div id="listModal" class="modal-overlay">
     <div class="modal-content">
-      <div class="modal-header"><span>Editace položek</span></div>
+      <div class="modal-header">
+        <span id="editModalTitle">Editace seznamu</span>
+      </div>
       <textarea id="itemsTextarea"></textarea>
       <div class="modal-footer">
         <button class="btn-cancel" onclick="document.getElementById('listModal').style.display='none'">Zrušit</button>
@@ -262,7 +208,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <span id="historyTitle">Historie</span>
-        <button style="background:none; color:#333; padding:0; border:none;" onclick="document.getElementById('historyModal').style.display='none'">✕</button>
+        <button style="background:none; color:#333; padding:0; border:none; font-size:18px;" onclick="document.getElementById('historyModal').style.display='none'">✕</button>
       </div>
       <div style="font-size: 12px; color: #777; margin-bottom: 5px;">Klikni na číslo pro úpravu, křížek pro smazání.</div>
       <div id="historyContainer" class="history-list"></div>
@@ -273,8 +219,8 @@
   </div>
 
   <script>
-    // --- DATA ---
-    const defaultList = [
+    // --- KONFIGURACE A DATA ---
+    const defaultItems = [
       "4:1", "10:1", "Filet-O-Fish", "Slanina dlouha", "Slaninové kousky",
       "Tasticka jablko", "Tasticka boruvka", "English muffin", "Pork maso",
       "Hashbrown", "Tortilla 20cm", "Tortilla 25cm", "Kureci Nuggety(15s)",
@@ -286,57 +232,54 @@
       "Vejce", "Salat BM", "Friends-collect", "Káva", "Mléko 3,5%"
     ];
 
-    let itemList = JSON.parse(localStorage.getItem("inventoryList_v4")) || defaultList;
-    let inventoryLogs = JSON.parse(localStorage.getItem("inventoryLogs_v1")) || [];
+    // Aktuální typ seznamu (daily nebo weekly)
+    let currentType = localStorage.getItem("currentListType_v5") || 'daily';
+
+    // Načteme seznamy pro oba typy
+    let listData = {
+      daily: JSON.parse(localStorage.getItem("inventoryList_daily_v5")) || [...defaultItems],
+      weekly: JSON.parse(localStorage.getItem("inventoryList_weekly_v5")) || [...defaultItems]
+    };
+
+    // Načteme logy (historii) pro oba typy
+    let logData = {
+      daily: JSON.parse(localStorage.getItem("inventoryLogs_daily_v5")) || [],
+      weekly: JSON.parse(localStorage.getItem("inventoryLogs_weekly_v5")) || []
+    };
+
     let isSubtractionMode = false;
     const unitNames = { 'pack': 'Balení', 'bag': 'Sáčky', 'pcs': 'Kusy' };
 
-    // --- VYHLEDÁVÁNÍ ---
-    const searchBar = document.getElementById('searchBar');
-    const searchInput = document.getElementById('searchInput');
-
-    function toggleSearch() {
-      if (searchBar.style.display === 'block') {
-        closeSearch();
-      } else {
-        searchBar.style.display = 'block';
-        searchInput.focus(); // Automaticky aktivuje klávesnici
-      }
-    }
-
-    function closeSearch() {
-      searchBar.style.display = 'none';
-      searchInput.value = '';
-      filterItems(''); // Reset filtru
-    }
-
-    // Živé vyhledávání
-    searchInput.addEventListener('input', (e) => {
-      filterItems(e.target.value);
-    });
-
-    function filterItems(query) {
-      const rows = document.querySelectorAll('#inventoryTable tr');
-      const lowerQuery = query.toLowerCase();
+    // --- PŘEPÍNÁNÍ SEZNAMŮ ---
+    function switchListType(type) {
+      currentType = type;
+      localStorage.setItem("currentListType_v5", type); // Zapamatovat si volbu
       
-      rows.forEach(row => {
-        const itemName = row.querySelector('.item-name').textContent.toLowerCase();
-        if (itemName.includes(lowerQuery)) {
-          row.classList.remove('hidden');
-        } else {
-          row.classList.add('hidden');
-        }
-      });
+      // Update UI Tabs
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + type).classList.add('active');
+
+      // Update Title
+      const titleLabel = (type === 'daily') ? 'DENNÍ' : 'TÝDENNÍ';
+      document.getElementById('pageTitle').textContent = `${titleLabel} INVENTURA`;
+
+      // Zavřít hledání při přepnutí, aby to nemátlo
+      closeSearch();
+      renderTable();
     }
 
-    // --- TABULKA A LOGIKA ---
+    // --- RENDEROVÁNÍ TABULKY ---
     const tbody = document.getElementById("inventoryTable");
 
     function renderTable() {
       tbody.innerHTML = "";
-      const totals = calculateTotals();
+      
+      const currentList = listData[currentType];
+      const currentLogs = logData[currentType];
+      
+      const totals = calculateTotals(currentList, currentLogs);
 
-      itemList.forEach(item => {
+      currentList.forEach(item => {
         const t = totals[item] || { pack: 0, bag: 0, pcs: 0 };
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -357,24 +300,34 @@
         `;
         tbody.appendChild(row);
 
+        // Enter key listeners
         ['pack', 'bag', 'pcs'].forEach(type => {
           document.getElementById(`${item}-${type}`).addEventListener("keypress", function(e) {
             if (e.key === "Enter") { e.preventDefault(); updateItem(item); }
           });
         });
       });
+      
+      // Aplikovat filtr hledání, pokud je něco zadáno
+      const searchVal = document.getElementById('searchInput').value;
+      if(searchVal) filterItems(searchVal);
+      
       updateOkButtonsText();
     }
 
-    function calculateTotals() {
+    function calculateTotals(items, logs) {
       const totals = {};
-      itemList.forEach(i => totals[i] = { pack: 0, bag: 0, pcs: 0 });
-      inventoryLogs.forEach(log => {
-        if (totals[log.item]) totals[log.item][log.unit] += log.val;
+      items.forEach(i => totals[i] = { pack: 0, bag: 0, pcs: 0 });
+      logs.forEach(log => {
+        // Počítáme jen pokud položka stále existuje v seznamu
+        if (totals[log.item]) {
+          totals[log.item][log.unit] += log.val;
+        }
       });
       return totals;
     }
 
+    // --- UPDATE POLOŽKY ---
     function updateItem(item) {
       const inputs = ['pack', 'bag', 'pcs'];
       let changed = false;
@@ -384,11 +337,14 @@
         let val = parseFloat(inputEl.value);
         if (!isNaN(val)) {
           if (isSubtractionMode) val = -val;
-          inventoryLogs.push({
+          
+          // Přidat do logu aktuálního typu
+          logData[currentType].push({
             id: Date.now() + Math.random(),
             item: item, unit: unit, val: val,
             timestamp: new Date().toISOString()
           });
+          
           inputEl.value = "";
           changed = true;
           highlightChange(`${item}-${unit}-total`);
@@ -397,14 +353,15 @@
 
       if (changed) {
         saveData();
-        refreshTotalsDisplay(item);
-        // Pokud hledáme, nevymazáváme filtr, aby uživatel viděl co upravil
+        refreshSingleItemDisplay(item);
       }
     }
 
-    function refreshTotalsDisplay(item) {
+    function refreshSingleItemDisplay(item) {
+      // Optimalizovaný refresh bez překreslení celé tabulky
       let t = { pack: 0, bag: 0, pcs: 0 };
-      inventoryLogs.filter(l => l.item === item).forEach(l => t[l.unit] += l.val);
+      logData[currentType].filter(l => l.item === item).forEach(l => t[l.unit] += l.val);
+      
       document.getElementById(`${item}-pack-total`).textContent = t.pack;
       document.getElementById(`${item}-bag-total`).textContent = t.bag;
       document.getElementById(`${item}-pcs-total`).textContent = t.pcs;
@@ -412,18 +369,56 @@
 
     function highlightChange(elementId) {
       const el = document.getElementById(elementId);
-      el.classList.remove("updated");
-      void el.offsetWidth;
-      el.classList.add("updated");
+      if(el) {
+        el.classList.remove("updated");
+        void el.offsetWidth;
+        el.classList.add("updated");
+      }
     }
 
-    function saveData() { localStorage.setItem("inventoryLogs_v1", JSON.stringify(inventoryLogs)); }
+    function saveData() {
+      // Ukládáme jen aktuálně modifikovaná data
+      localStorage.setItem(`inventoryLogs_${currentType}_v5`, JSON.stringify(logData[currentType]));
+      localStorage.setItem(`inventoryList_${currentType}_v5`, JSON.stringify(listData[currentType]));
+    }
+
+    // --- HLEDÁNÍ ---
+    const searchBar = document.getElementById('searchBar');
+    const searchInput = document.getElementById('searchInput');
+
+    function toggleSearch() {
+      if (searchBar.style.display === 'block') {
+        closeSearch();
+      } else {
+        searchBar.style.display = 'block';
+        searchInput.focus();
+      }
+    }
+
+    function closeSearch() {
+      searchBar.style.display = 'none';
+      searchInput.value = '';
+      filterItems('');
+    }
+
+    searchInput.addEventListener('input', (e) => filterItems(e.target.value));
+
+    function filterItems(query) {
+      const rows = document.querySelectorAll('#inventoryTable tr');
+      const lowerQuery = query.toLowerCase();
+      rows.forEach(row => {
+        const name = row.querySelector('.item-name').textContent.toLowerCase();
+        if (name.includes(lowerQuery)) row.classList.remove('hidden');
+        else row.classList.add('hidden');
+      });
+    }
 
     // --- HISTORIE ---
-    let currentHistoryItem = null;
+    let historyTargetItem = null;
+
     function openHistory(item) {
-      currentHistoryItem = item;
-      document.getElementById("historyTitle").textContent = "Historie: " + item;
+      historyTargetItem = item;
+      document.getElementById("historyTitle").textContent = item;
       renderHistoryList();
       document.getElementById("historyModal").style.display = "flex";
     }
@@ -431,12 +426,14 @@
     function renderHistoryList() {
       const container = document.getElementById("historyContainer");
       container.innerHTML = "";
-      const logs = inventoryLogs.filter(l => l.item === currentHistoryItem).reverse();
+      // Filtrujeme logy aktuálního typu pro danou položku
+      const logs = logData[currentType].filter(l => l.item === historyTargetItem).reverse();
 
       if (logs.length === 0) {
-        container.innerHTML = "<div style='padding:20px; text-align:center; color:#999'>Žádné záznamy</div>";
+        container.innerHTML = "<div style='padding:20px; text-align:center; color:#999'>Žádné záznamy v tomto seznamu</div>";
         return;
       }
+
       logs.forEach(log => {
         const div = document.createElement("div");
         div.className = "history-item";
@@ -452,62 +449,75 @@
     }
 
     function deleteLogEntry(id) {
-      if (confirm("Smazat tento záznam?")) {
-        inventoryLogs = inventoryLogs.filter(l => l.id !== id);
+      if (confirm("Smazat záznam?")) {
+        logData[currentType] = logData[currentType].filter(l => l.id !== id);
         saveData();
         renderHistoryList();
-        refreshTotalsDisplay(currentHistoryItem);
+        refreshSingleItemDisplay(historyTargetItem);
       }
     }
 
     function editLogEntry(id) {
-      const log = inventoryLogs.find(l => l.id === id);
+      const log = logData[currentType].find(l => l.id === id);
       if (!log) return;
-      const newVal = prompt("Upravit hodnotu:", log.val);
+      const newVal = prompt("Nová hodnota:", log.val);
       if (newVal !== null) {
-        const parsed = parseFloat(newVal);
-        if (!isNaN(parsed)) {
-          log.val = parsed;
+        const p = parseFloat(newVal);
+        if (!isNaN(p)) {
+          log.val = p;
           saveData();
           renderHistoryList();
-          refreshTotalsDisplay(currentHistoryItem);
+          refreshSingleItemDisplay(historyTargetItem);
         }
       }
     }
 
-    // --- SEZNAM A OSTATNÍ ---
+    // --- EDITACE SEZNAMU ---
     function openEditListModal() {
-      document.getElementById("itemsTextarea").value = itemList.join("\n");
+      const title = (currentType === 'daily') ? 'Denní' : 'Týdenní';
+      document.getElementById('editModalTitle').textContent = `Editace: ${title} seznam`;
+      document.getElementById("itemsTextarea").value = listData[currentType].join("\n");
       document.getElementById("listModal").style.display = "flex";
     }
+
     function saveNewList() {
       const rawText = document.getElementById("itemsTextarea").value;
       const newItems = rawText.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+      
       if (newItems.length === 0) { alert("Seznam nesmí být prázdný"); return; }
-      if (confirm("Uložit nový seznam?")) {
-        itemList = newItems;
-        localStorage.setItem("inventoryList_v4", JSON.stringify(itemList));
+      
+      if (confirm(`Uložit změny pro ${currentType === 'daily' ? 'Denní' : 'Týdenní'} seznam?`)) {
+        listData[currentType] = newItems;
+        saveData();
         document.getElementById("listModal").style.display = "none";
         renderTable();
       }
     }
+
+    // --- RESET A MODES ---
     function resetInventory() {
-      if (confirm("Opravdu smazat historii a začít od nuly?")) {
-        inventoryLogs = [];
+      const label = (currentType === 'daily') ? 'DENNÍ' : 'TÝDENNÍ';
+      if (confirm(`Opravdu vynulovat data pouze pro ${label} inventuru?`)) {
+        logData[currentType] = [];
         saveData();
         renderTable();
       }
     }
+
     function setMode(mode) {
       isSubtractionMode = (mode === 'sub');
       document.body.className = isSubtractionMode ? 'mode-sub' : 'mode-add';
       updateOkButtonsText();
     }
+
     function updateOkButtonsText() {
-      document.querySelectorAll('.btn-ok').forEach(btn => btn.textContent = isSubtractionMode ? "-" : "OK");
+      const txt = isSubtractionMode ? "-" : "OK";
+      document.querySelectorAll('.btn-ok').forEach(b => b.textContent = txt);
     }
 
-    renderTable();
+    // Inicializace
+    switchListType(currentType);
+
   </script>
 </body>
 </html>
