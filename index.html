@@ -2,20 +2,20 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Rychlá Inventura</title>
+  <title>Inventura pro PC</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     :root {
-      --primary: #27ae60;
-      --bg: #fdfbf7;
-      --border: #ddd;
+      --primary: #2c3e50;
+      --accent: #27ae60;
+      --bg: #f4f4f4;
+      --border: #ccc;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       padding: 0;
       margin: 0;
       background: var(--bg);
-      font-size: 14px;
       color: #333;
     }
     header {
@@ -23,103 +23,115 @@
       background: #fff;
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 100;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    h2 { margin: 0; font-size: 18px; }
+    h2 { margin: 0; font-size: 20px; color: var(--primary); }
     
-    .btn-group { display: flex; gap: 5px; }
-    
-    button {
-      padding: 0.5rem 0.8rem;
-      border-radius: 4px;
+    button.btn-reset {
+      background: #c0392b;
+      color: white;
       border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      font-weight: bold;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 13px;
     }
-    .btn-copy { background: #3498db; color: white; }
-    .btn-reset { background: #e74c3c; color: white; }
-    .btn-add { background: var(--primary); color: white; width: 100%; margin-top: 2px;}
 
     .table-container {
-      overflow-x: auto;
-      padding-bottom: 60px; /* Space for footer/scroll */
+      padding-bottom: 50px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      table-layout: fixed; /* Fixed Layout for better mobile inputs */
+      table-layout: fixed;
     }
     th {
-      background: #eee;
+      background: #e2e6ea;
       position: sticky;
-      top: 0; /* Sticky within container if logic allows, simplified here */
-      font-size: 12px;
-      padding: 8px 2px;
+      top: 0;
+      font-size: 13px;
+      padding: 10px 2px;
+      color: #555;
+      border-bottom: 2px solid #bdc3c7;
     }
     td {
-      padding: 5px 2px;
-      border-bottom: 1px solid var(--border);
+      padding: 8px 4px;
+      border-bottom: 1px solid #ddd;
       text-align: center;
       vertical-align: middle;
     }
-    tr:nth-child(even) { background-color: #f9f9f9; }
+    /* Zebra pruhování pro lepší orientaci v řádcích */
+    tr:nth-child(even) { background-color: #fff; }
+    tr:nth-child(odd) { background-color: #f1f2f6; }
     
-    /* Input Styling */
+    /* Vstupní pole */
     input {
       width: 100%;
-      max-width: 50px;
-      padding: 8px 2px;
+      max-width: 60px;
+      padding: 8px 0;
       text-align: center;
-      border: 1px solid #ccc;
+      border: 1px solid #bbb;
       border-radius: 4px;
-      font-size: 16px; /* Prevents zoom on iOS */
-      -moz-appearance: textfield;
+      font-size: 16px;
+      background: #fff;
     }
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
+    input:focus {
+      border-color: var(--accent);
+      outline: none;
+      background: #e8f8f5;
     }
 
+    /* Názvy položek */
     .item-name {
-      font-size: 13px;
+      font-size: 14px;
+      font-weight: 600;
       text-align: left;
-      padding-left: 8px;
-      word-wrap: break-word;
+      padding-left: 10px;
+      color: var(--primary);
     }
     
+    /* Zobrazení součtů - ZVĚTŠENO PRO SNADNÉ OPISOVÁNÍ */
     .total-display {
       display: block;
-      font-weight: bold;
-      color: #555;
-      font-size: 12px;
-      margin-top: 2px;
-      transition: color 0.3s, transform 0.2s;
-    }
-    .updated {
+      font-weight: 800;
       color: var(--primary);
-      transform: scale(1.2);
+      font-size: 18px; /* Velké číslo */
+      margin-top: 4px;
+    }
+    
+    /* Zvýraznění při změně */
+    .updated {
+      color: var(--accent);
+      transform: scale(1.3);
+      transition: transform 0.2s, color 0.2s;
     }
 
-    /* Col widths */
-    col.c-name { width: 35%; }
+    /* Tlačítko OK */
+    .btn-ok {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    /* Nastavení šířky sloupců */
+    col.c-name { width: 34%; }
     col.c-input { width: 18%; }
-    col.c-action { width: 11%; }
+    col.c-action { width: 12%; }
   </style>
 </head>
 <body>
 
   <header>
     <h2>Inventura</h2>
-    <div class="btn-group">
-      <button class="btn-copy" onclick="copyToClipboard()">📋 Kopírovat</button>
-      <button class="btn-reset" onclick="resetInventory()">🗑️ Reset</button>
-    </div>
+    <button class="btn-reset" onclick="resetInventory()">Nová inventura (Reset)</button>
   </header>
 
   <div class="table-container">
@@ -137,7 +149,7 @@
           <th>Bal.</th>
           <th>Sáč.</th>
           <th>Kusy</th>
-          <th>+</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="inventoryTable">
@@ -158,20 +170,19 @@
       "Vejce", "Salat BM", "Friends-collect", "Káva", "Mléko 3,5%"
     ];
 
-    let inventory = JSON.parse(localStorage.getItem("inventoryData_v2")) || {};
+    let inventory = JSON.parse(localStorage.getItem("inventory_simple")) || {};
 
-    // Inicializace dat
+    // Inicializace
     itemList.forEach(item => {
       if (!inventory[item]) inventory[item] = { pack: 0, bag: 0, pcs: 0 };
     });
 
     const tbody = document.getElementById("inventoryTable");
 
-    // Vykreslení tabulky
     itemList.forEach(item => {
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td class="item-name"><strong>${item}</strong></td>
+        <td class="item-name">${item}</td>
         <td>
           <input type="number" inputmode="decimal" id="${item}-pack" placeholder="">
           <span class="total-display" id="${item}-pack-total">0</span>
@@ -184,17 +195,16 @@
           <input type="number" inputmode="decimal" id="${item}-pcs" placeholder="">
           <span class="total-display" id="${item}-pcs-total">0</span>
         </td>
-        <td><button class="btn-add" onclick="updateItem('${item}')">OK</button></td>
+        <td><button class="btn-ok" onclick="updateItem('${item}')">OK</button></td>
       `;
       tbody.appendChild(row);
 
-      // Přidání Listeneru pro Enter v inputech
+      // Enter key support
       [`${item}-pack`, `${item}-bag`, `${item}-pcs`].forEach(id => {
         document.getElementById(id).addEventListener("keypress", function(event) {
           if (event.key === "Enter") {
             event.preventDefault();
             updateItem(item);
-            // Volitelně: přesunout focus na další input?
           }
         });
       });
@@ -210,17 +220,14 @@
         
         if (!isNaN(val) && val !== 0) {
           inventory[item][type] += val;
-          // Ošetření záporných hodnot (aby nešlo pod nulu, pokud to není chtěné - volitelné)
-          // if(inventory[item][type] < 0) inventory[item][type] = 0; 
-          
-          inputEl.value = ""; // Vymazat input
+          inputEl.value = ""; // Vymazat po zadání
           highlightChange(`${item}-${type}-total`);
           changed = true;
         }
       });
 
       if (changed) {
-        localStorage.setItem("inventoryData_v2", JSON.stringify(inventory));
+        localStorage.setItem("inventory_simple", JSON.stringify(inventory));
         updateDisplay(item);
       }
     }
@@ -238,39 +245,16 @@
     }
 
     function resetInventory() {
-      if (confirm("Opravdu chceš smazat všechna data a začít od nuly?")) {
+      if (confirm("Opravdu smazat všechna data?")) {
         itemList.forEach(item => {
           inventory[item] = { pack: 0, bag: 0, pcs: 0 };
           updateDisplay(item);
         });
-        localStorage.setItem("inventoryData_v2", JSON.stringify(inventory));
+        localStorage.setItem("inventory_simple", JSON.stringify(inventory));
       }
     }
 
-    function copyToClipboard() {
-      let text = "INVENTURA:\n\n";
-      let hasData = false;
-      
-      itemList.forEach(item => {
-        const i = inventory[item];
-        if (i.pack > 0 || i.bag > 0 || i.pcs > 0) {
-          text += `${item}: ${i.pack} bal | ${i.bag} sáč | ${i.pcs} ks\n`;
-          hasData = true;
-        }
-      });
-
-      if (!hasData) text += "Žádná data.";
-
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Zkopírováno do schránky! Nyní můžeš vložit (Ctrl+V) do mailu nebo zprávy.");
-      }).catch(err => {
-        alert("Chyba kopírování: " + err);
-      });
-    }
-
-    // Načtení hodnot při startu
     itemList.forEach(updateDisplay);
   </script>
-
 </body>
 </html>
