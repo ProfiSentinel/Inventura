@@ -2,12 +2,13 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Inventura pro PC</title>
+  <title>Inventura PRO</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     :root {
       --primary: #2c3e50;
-      --accent: #27ae60;
+      --add-color: #27ae60;
+      --sub-color: #c0392b;
       --bg: #f4f4f4;
       --border: #ccc;
     }
@@ -17,32 +18,70 @@
       margin: 0;
       background: var(--bg);
       color: #333;
+      padding-bottom: 50px;
     }
+
+    /* HEADER & OVLÁDÁNÍ */
     header {
-      padding: 1rem;
+      padding: 10px;
       background: #fff;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 10px;
     }
-    h2 { margin: 0; font-size: 20px; color: var(--primary); }
+    h2 { margin: 0; font-size: 18px; color: var(--primary); }
+
+    .header-controls {
+      display: flex;
+      gap: 5px;
+    }
     
-    button.btn-reset {
-      background: #c0392b;
-      color: white;
+    button {
       border: none;
-      padding: 8px 15px;
       border-radius: 4px;
+      padding: 8px 12px;
       font-weight: bold;
       cursor: pointer;
+      font-size: 13px;
     }
+    .btn-edit { background: #3498db; color: white; }
+    .btn-reset { background: #7f8c8d; color: white; }
+    .btn-copy { background: #f39c12; color: white; }
 
+    /* PŘEPÍNAČ REŽIMU +/- */
+    .mode-switch {
+      display: flex;
+      width: 100%;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #ddd;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    /* Styly pro aktivní režimy */
+    body.mode-add .mode-add-btn { background: var(--add-color); color: white; }
+    body.mode-add .mode-sub-btn { background: #fff; color: #aaa; }
+    
+    body.mode-sub .mode-sub-btn { background: var(--sub-color); color: white; }
+    body.mode-sub .mode-add-btn { background: #fff; color: #aaa; }
+
+    /* TABULKA */
     .table-container {
-      padding-bottom: 50px;
+      margin-top: 5px;
     }
     table {
       width: 100%;
@@ -51,12 +90,9 @@
     }
     th {
       background: #e2e6ea;
-      position: sticky;
-      top: 0;
       font-size: 13px;
-      padding: 10px 2px;
+      padding: 8px 2px;
       color: #555;
-      border-bottom: 2px solid #bdc3c7;
     }
     td {
       padding: 8px 4px;
@@ -64,74 +100,124 @@
       text-align: center;
       vertical-align: middle;
     }
-    /* Zebra pruhování pro lepší orientaci v řádcích */
     tr:nth-child(even) { background-color: #fff; }
-    tr:nth-child(odd) { background-color: #f1f2f6; }
+    tr:nth-child(odd) { background-color: #f8f9fa; }
     
-    /* Vstupní pole */
-    input {
-      width: 100%;
-      max-width: 60px;
-      padding: 8px 0;
-      text-align: center;
-      border: 1px solid #bbb;
-      border-radius: 4px;
-      font-size: 16px;
-      background: #fff;
-    }
-    input:focus {
-      border-color: var(--accent);
-      outline: none;
-      background: #e8f8f5;
-    }
-
-    /* Názvy položek */
     .item-name {
       font-size: 14px;
       font-weight: 600;
       text-align: left;
-      padding-left: 10px;
+      padding-left: 8px;
       color: var(--primary);
+      overflow-wrap: break-word;
     }
-    
-    /* Zobrazení součtů - ZVĚTŠENO PRO SNADNÉ OPISOVÁNÍ */
+
+    /* INPUTY */
+    input {
+      width: 100%;
+      padding: 8px 0;
+      text-align: center;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      font-size: 18px; /* Větší písmo pro čísla */
+      background: #fff;
+      font-weight: 600;
+    }
+    input:focus {
+      border-color: #3498db;
+      outline: none;
+      background: #e8f8f5;
+    }
+
+    /* TOTALY */
     .total-display {
       display: block;
       font-weight: 800;
       color: var(--primary);
-      font-size: 18px; /* Velké číslo */
+      font-size: 16px;
       margin-top: 4px;
     }
-    
-    /* Zvýraznění při změně */
     .updated {
-      color: var(--accent);
-      transform: scale(1.3);
-      transition: transform 0.2s, color 0.2s;
+      animation: pop 0.3s ease-in-out;
+      color: var(--add-color);
+    }
+    @keyframes pop {
+      50% { transform: scale(1.4); }
     }
 
-    /* Tlačítko OK */
+    /* TLAČÍTKO OK */
     .btn-ok {
-      background: var(--accent);
       color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 8px;
       width: 100%;
-      font-weight: bold;
+      padding: 10px 0;
+      border-radius: 4px;
+      transition: background 0.2s;
     }
+    /* Barva OK tlačítka se mění podle režimu */
+    body.mode-add .btn-ok { background: var(--add-color); }
+    body.mode-sub .btn-ok { background: var(--sub-color); }
 
-    /* Nastavení šířky sloupců */
-    col.c-name { width: 34%; }
+    /* MODAL (Okno úprav) */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+    .modal-header { font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; }
+    textarea {
+      flex: 1;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: none;
+      font-family: monospace;
+    }
+    .modal-footer {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    .btn-save { background: var(--add-color); color: white; flex: 1; padding: 12px; }
+    .btn-cancel { background: #95a5a6; color: white; flex: 1; padding: 12px; }
+
+    /* Sloupce */
+    col.c-name { width: 35%; }
     col.c-input { width: 18%; }
-    col.c-action { width: 12%; }
+    col.c-action { width: 11%; }
   </style>
 </head>
-<body>
-
-  <header>
-    <h2>Inventura</h2>
-    <button class="btn-reset" onclick="resetInventory()">Nová inventura (Reset)</button>
+<body class="mode-add"> <header>
+    <div class="header-top">
+      <h2>Inventura</h2>
+      <div class="header-controls">
+        <button class="btn-copy" onclick="copyToClipboard()" title="Kopírovat">📋</button>
+        <button class="btn-edit" onclick="openEditModal()">✏️ Upravit</button>
+        <button class="btn-reset" onclick="resetInventory()">🔄 Reset</button>
+      </div>
+    </div>
+    
+    <div class="mode-switch">
+      <div class="mode-btn mode-add-btn" onclick="setMode('add')">➕ PŘIDAT</div>
+      <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">➖ ODEČÍST</div>
+    </div>
   </header>
 
   <div class="table-container">
@@ -157,8 +243,23 @@
     </table>
   </div>
 
+  <div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>Editace položek</span>
+        <span style="font-size: 12px; font-weight: normal; color: #666;">Každá položka na nový řádek</span>
+      </div>
+      <textarea id="itemsTextarea"></textarea>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeEditModal()">Zrušit</button>
+        <button class="btn-save" onclick="saveNewList()">ULOŽIT ZMĚNY</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const itemList = [
+    // Výchozí seznam, pokud uživatel nemá vlastní
+    const defaultList = [
       "4:1", "10:1", "Filet-O-Fish", "Slanina dlouha", "Slaninové kousky",
       "Tasticka jablko", "Tasticka boruvka", "English muffin", "Pork maso",
       "Hashbrown", "Tortilla 20cm", "Tortilla 25cm", "Kureci Nuggety(15s)",
@@ -170,45 +271,61 @@
       "Vejce", "Salat BM", "Friends-collect", "Káva", "Mléko 3,5%"
     ];
 
-    let inventory = JSON.parse(localStorage.getItem("inventory_simple")) || {};
+    // Načtení seznamu a dat
+    let itemList = JSON.parse(localStorage.getItem("inventoryList_v3")) || defaultList;
+    let inventory = JSON.parse(localStorage.getItem("inventoryData_v3")) || {};
+    let isSubtractionMode = false;
 
-    // Inicializace
-    itemList.forEach(item => {
-      if (!inventory[item]) inventory[item] = { pack: 0, bag: 0, pcs: 0 };
-    });
+    // Inicializace chybějících objektů v datech
+    function initData() {
+      itemList.forEach(item => {
+        if (!inventory[item]) inventory[item] = { pack: 0, bag: 0, pcs: 0 };
+      });
+    }
+    initData();
 
+    // Vykreslení
     const tbody = document.getElementById("inventoryTable");
+    
+    function renderTable() {
+      tbody.innerHTML = "";
+      itemList.forEach(item => {
+        // Ošetření, pokud byla položka smazána ze seznamu, ale je v datech (nebo naopak)
+        if (!inventory[item]) inventory[item] = { pack: 0, bag: 0, pcs: 0 };
 
-    itemList.forEach(item => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td class="item-name">${item}</td>
-        <td>
-          <input type="number" inputmode="decimal" id="${item}-pack" placeholder="">
-          <span class="total-display" id="${item}-pack-total">0</span>
-        </td>
-        <td>
-          <input type="number" inputmode="decimal" id="${item}-bag" placeholder="">
-          <span class="total-display" id="${item}-bag-total">0</span>
-        </td>
-        <td>
-          <input type="number" inputmode="decimal" id="${item}-pcs" placeholder="">
-          <span class="total-display" id="${item}-pcs-total">0</span>
-        </td>
-        <td><button class="btn-ok" onclick="updateItem('${item}')">OK</button></td>
-      `;
-      tbody.appendChild(row);
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="item-name">${item}</td>
+          <td>
+            <input type="number" inputmode="decimal" id="${item}-pack" placeholder="">
+            <span class="total-display" id="${item}-pack-total">${inventory[item].pack}</span>
+          </td>
+          <td>
+            <input type="number" inputmode="decimal" id="${item}-bag" placeholder="">
+            <span class="total-display" id="${item}-bag-total">${inventory[item].bag}</span>
+          </td>
+          <td>
+            <input type="number" inputmode="decimal" id="${item}-pcs" placeholder="">
+            <span class="total-display" id="${item}-pcs-total">${inventory[item].pcs}</span>
+          </td>
+          <td><button class="btn-ok" id="btn-${item}" onclick="updateItem('${item}')">OK</button></td>
+        `;
+        tbody.appendChild(row);
 
-      // Enter key support
-      [`${item}-pack`, `${item}-bag`, `${item}-pcs`].forEach(id => {
-        document.getElementById(id).addEventListener("keypress", function(event) {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            updateItem(item);
-          }
+        // Enter key support
+        [`${item}-pack`, `${item}-bag`, `${item}-pcs`].forEach(id => {
+          document.getElementById(id).addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              updateItem(item);
+            }
+          });
         });
       });
-    });
+      updateOkButtonsText();
+    }
+
+    // --- LOGIKA AKTUALIZACE ---
 
     function updateItem(item) {
       const inputs = ['pack', 'bag', 'pcs'];
@@ -216,45 +333,124 @@
 
       inputs.forEach(type => {
         const inputEl = document.getElementById(`${item}-${type}`);
-        const val = parseFloat(inputEl.value);
+        let val = parseFloat(inputEl.value);
         
-        if (!isNaN(val) && val !== 0) {
+        if (!isNaN(val)) {
+          // Pokud je režim odečítání, otočíme znaménko
+          if (isSubtractionMode) {
+            val = -val;
+          }
+
           inventory[item][type] += val;
-          inputEl.value = ""; // Vymazat po zadání
-          highlightChange(`${item}-${type}-total`);
+          inputEl.value = ""; 
+          
+          // Vizuální efekt
+          const totalEl = document.getElementById(`${item}-${type}-total`);
+          totalEl.textContent = inventory[item][type];
+          totalEl.classList.remove("updated");
+          void totalEl.offsetWidth; // trigger reflow
+          totalEl.classList.add("updated");
+          
           changed = true;
         }
       });
 
       if (changed) {
-        localStorage.setItem("inventory_simple", JSON.stringify(inventory));
-        updateDisplay(item);
+        saveData();
       }
     }
 
-    function updateDisplay(item) {
-      document.getElementById(`${item}-pack-total`).textContent = inventory[item].pack;
-      document.getElementById(`${item}-bag-total`).textContent = inventory[item].bag;
-      document.getElementById(`${item}-pcs-total`).textContent = inventory[item].pcs;
+    function saveData() {
+      localStorage.setItem("inventoryData_v3", JSON.stringify(inventory));
     }
 
-    function highlightChange(elementId) {
-      const el = document.getElementById(elementId);
-      el.classList.add("updated");
-      setTimeout(() => el.classList.remove("updated"), 500);
+    // --- LOGIKA REŽIMŮ (+ / -) ---
+
+    function setMode(mode) {
+      const body = document.body;
+      if (mode === 'sub') {
+        body.classList.remove('mode-add');
+        body.classList.add('mode-sub');
+        isSubtractionMode = true;
+      } else {
+        body.classList.remove('mode-sub');
+        body.classList.add('mode-add');
+        isSubtractionMode = false;
+      }
+      updateOkButtonsText();
     }
+
+    function updateOkButtonsText() {
+      const btns = document.querySelectorAll('.btn-ok');
+      btns.forEach(btn => {
+        btn.textContent = isSubtractionMode ? "-" : "OK";
+      });
+    }
+
+    // --- EDITOR SEZNAMU ---
+
+    function openEditModal() {
+      const textarea = document.getElementById("itemsTextarea");
+      textarea.value = itemList.join("\n");
+      document.getElementById("editModal").style.display = "flex";
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").style.display = "none";
+    }
+
+    function saveNewList() {
+      const rawText = document.getElementById("itemsTextarea").value;
+      // Rozdělit podle řádků a vyčistit prázdné
+      const newItems = rawText.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+
+      if (newItems.length === 0) {
+        alert("Seznam nemůže být prázdný!");
+        return;
+      }
+
+      if (confirm("Uložení nového seznamu změní tabulku. Položky se stejným názvem si zachovají počty, nové budou mít 0. Pokračovat?")) {
+        itemList = newItems;
+        localStorage.setItem("inventoryList_v3", JSON.stringify(itemList));
+        initData(); // Zajistí strukturu pro nové položky
+        saveData(); // Uloží případné změny
+        renderTable();
+        closeEditModal();
+      }
+    }
+
+    // --- RESET A KOPIROVANI ---
 
     function resetInventory() {
-      if (confirm("Opravdu smazat všechna data?")) {
+      if (confirm("Opravdu vynulovat všechny počty? Seznam položek zůstane.")) {
         itemList.forEach(item => {
           inventory[item] = { pack: 0, bag: 0, pcs: 0 };
-          updateDisplay(item);
         });
-        localStorage.setItem("inventory_simple", JSON.stringify(inventory));
+        saveData();
+        renderTable();
       }
     }
 
-    itemList.forEach(updateDisplay);
+    function copyToClipboard() {
+      let text = "INVENTURA:\n\n";
+      let hasData = false;
+      itemList.forEach(item => {
+        const i = inventory[item];
+        if (i.pack !== 0 || i.bag !== 0 || i.pcs !== 0) {
+          text += `${item}: ${i.pack} bal | ${i.bag} sáč | ${i.pcs} ks\n`;
+          hasData = true;
+        }
+      });
+      if (!hasData) text += "Žádná data.";
+      
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Zkopírováno!");
+      }).catch(err => alert("Chyba: " + err));
+    }
+
+    // Start
+    renderTable();
+
   </script>
 </body>
 </html>
