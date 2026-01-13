@@ -12,13 +12,13 @@
       --bg: #f4f4f4;
       --active-tab: #34495e;
       --inactive-tab: #ecf0f1;
+      /* Výška sticky ovládání pro výpočet posunu tabulky */
+      --sticky-height: 55px; 
     }
     
     html, body {
       height: 100%;
-      /* TOTO JE KLÍČOVÁ ÚPRAVA PROTI RELOADU: */
-      overscroll-behavior-y: none; 
-      /* Zabraňuje "pružnému" efektu a gestu obnovení na mobilech */
+      overscroll-behavior-y: none; /* Zákaz reloadu potažením */
     }
 
     body {
@@ -26,14 +26,14 @@
       padding: 0; margin: 0; background: var(--bg); color: #333; padding-bottom: 80px;
     }
 
-    /* HEADER */
+    /* --- STATICKÁ ČÁST HEADERU (Zmizí při scrollu) --- */
     header {
       background: #fff;
-      position: sticky; top: 0; z-index: 100;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      /* Už není sticky, odroluje pryč */
+      position: relative; 
+      z-index: 101;
     }
     
-    /* PŘEPÍNAČ SEZNAMŮ (TABS) */
     .list-tabs {
       display: flex; background: #bdc3c7;
     }
@@ -46,10 +46,9 @@
       background: #fff; color: var(--primary); border-bottom: 3px solid var(--primary);
     }
 
-    /* OVLÁDACÍ PANEL */
-    .header-main { padding: 10px; }
-    .header-top {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+    .header-info-row {
+      display: flex; justify-content: space-between; align-items: center; 
+      padding: 10px; border-bottom: 1px solid #eee;
     }
     h2 { margin: 0; font-size: 18px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -60,12 +59,23 @@
     .btn-edit { background: #3498db; }
     .btn-reset { background: #95a5a6; }
 
+    /* --- STICKY ČÁST (Zůstane nahoře) --- */
+    .sticky-controls-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #fff;
+      padding: 5px 10px 10px 10px;
+      box-shadow: 0 4px 5px -2px rgba(0,0,0,0.1); /* Stín pouze dole */
+    }
+
     /* MODE SWITCH (+/-) */
     .mode-switch {
-      display: flex; width: 100%; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; margin-top: 5px;
+      display: flex; width: 100%; border-radius: 6px; overflow: hidden; border: 1px solid #ddd;
     }
     .mode-btn {
-      flex: 1; padding: 8px; text-align: center; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.3s, color 0.3s;
+      flex: 1; padding: 10px 0; text-align: center; font-weight: bold; font-size: 16px; 
+      cursor: pointer; transition: background 0.2s, color 0.2s;
     }
     body.mode-add .mode-add-btn { background: var(--add-color); color: white; }
     body.mode-add .mode-sub-btn { background: #fff; color: #aaa; }
@@ -73,10 +83,14 @@
     body.mode-sub .mode-add-btn { background: #fff; color: #aaa; }
 
     /* SEARCH BAR */
-    #searchBar { display: none; padding: 5px 10px 10px 10px; border-bottom: 1px solid #eee; }
+    #searchBar { 
+      display: none; 
+      padding-bottom: 10px; /* Mezera mezi hledáním a tlačítky */
+    }
     .search-input-wrapper { position: relative; display: flex; align-items: center; }
     #searchInput { width: 100%; padding: 8px; font-size: 16px; border: 2px solid #3498db; border-radius: 6px; outline: none; }
     .search-close { position: absolute; right: 8px; background: none; font-size: 18px; color: #999; border: none; padding: 5px; }
+
 
     /* FAB Search Button */
     .fab-search {
@@ -88,9 +102,20 @@
     .fab-search:active { transform: scale(0.9); }
 
     /* TABULKA */
-    .table-container { margin-top: 5px; }
+    .table-container { margin-top: 0; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    th { background: #e2e6ea; font-size: 12px; padding: 8px 2px; color: #555; }
+    
+    th { 
+      background: #e2e6ea; font-size: 12px; padding: 8px 2px; color: #555; 
+      /* Sticky header tabulky */
+      position: sticky;
+      /* Musí být posunutý o výšku sticky-controls-wrapper, aby nebyl schovaný pod ním. 
+         Zde dáváme odhadem 58px. */
+      top: 58px; 
+      z-index: 90;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
     td { padding: 8px 4px; border-bottom: 1px solid #ddd; text-align: center; vertical-align: middle; }
     tr.hidden { display: none; }
     
@@ -152,28 +177,28 @@
       <button class="tab-btn" id="tab-weekly" onclick="switchListType('weekly')">TÝDENNÍ</button>
     </div>
 
-    <div class="header-main">
-      <div class="header-top">
-        <h2 id="pageTitle">Denní inventura</h2>
-        <div class="header-controls">
-          <button class="ctrl-btn btn-edit" onclick="openEditListModal()">✏️ Seznam</button>
-          <button class="ctrl-btn btn-reset" onclick="resetInventory()">🔄 Reset</button>
-        </div>
-      </div>
-      
-      <div id="searchBar">
-        <div class="search-input-wrapper">
-          <input type="text" id="searchInput" placeholder="Hledat položku..." autocomplete="off">
-          <button class="search-close" onclick="closeSearch()">✕</button>
-        </div>
-      </div>
-
-      <div class="mode-switch">
-        <div class="mode-btn mode-add-btn" onclick="setMode('add')">➕ PŘIDAT</div>
-        <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">➖ ODEČÍST</div>
+    <div class="header-info-row">
+      <h2 id="pageTitle">Denní inventura</h2>
+      <div class="header-controls">
+        <button class="ctrl-btn btn-edit" onclick="openEditListModal()">✏️ Seznam</button>
+        <button class="ctrl-btn btn-reset" onclick="resetInventory()">🔄 Reset</button>
       </div>
     </div>
   </header>
+
+  <div class="sticky-controls-wrapper">
+    <div id="searchBar">
+      <div class="search-input-wrapper">
+        <input type="text" id="searchInput" placeholder="Hledat položku..." autocomplete="off">
+        <button class="search-close" onclick="closeSearch()">✕</button>
+      </div>
+    </div>
+
+    <div class="mode-switch">
+      <div class="mode-btn mode-add-btn" onclick="setMode('add')">➕ PŘIDAT</div>
+      <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">➖ ODEČÍST</div>
+    </div>
+  </div>
 
   <div class="table-container">
     <table>
@@ -227,12 +252,11 @@
   </div>
 
   <script>
-    // --- OCHRANA PŘED RELOADEM (VYLEPŠENÁ) ---
-    // 1. Ochrana před zavřením/reloadem přes systémový dialog
+    // --- OCHRANA PŘED RELOADEM ---
     window.addEventListener('beforeunload', function (e) {
       if (hasUnsavedInputs()) {
         e.preventDefault();
-        e.returnValue = 'Máte neuložená data!'; // Nutné pro některé prohlížeče
+        e.returnValue = 'Máte neuložená data!'; 
         return 'Máte neuložená data!';
       }
     });
@@ -240,16 +264,13 @@
     function hasUnsavedInputs() {
       const inputs = document.querySelectorAll('input.qty-input');
       for (let input of inputs) {
-        // Kontroluje, zda je hodnota číselná a není prázdná
-        if (input.value.trim() !== "") {
-          return true;
-        }
+        if (input.value.trim() !== "") return true;
       }
       return false;
     }
 
 
-    // --- KONFIGURACE A DATA ---
+    // --- DATA ---
     const defaultItems = [
       "4:1", "10:1", "Filet-O-Fish", "Slanina dlouha", "Slaninové kousky",
       "Tasticka jablko", "Tasticka boruvka", "English muffin", "Pork maso",
@@ -280,9 +301,7 @@
     // --- PŘEPÍNÁNÍ SEZNAMŮ ---
     function switchListType(type) {
       if (hasUnsavedInputs()) {
-        if (!confirm("Máte rozepsaná čísla. Pokud přepnete seznam, zmizí. Pokračovat?")) {
-          return;
-        }
+        if (!confirm("Máte rozepsaná čísla. Pokud přepnete seznam, zmizí. Pokračovat?")) return;
       }
 
       currentType = type;
