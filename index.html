@@ -16,6 +16,7 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       padding: 0; margin: 0; background: var(--bg); color: #333; padding-bottom: 80px;
+      overscroll-behavior-y: contain; /* Prevents pull-to-refresh on some browsers */
     }
 
     /* HEADER */
@@ -219,6 +220,29 @@
   </div>
 
   <script>
+    // --- OCHRANA PŘED RELOADEM (UNSAVED CHANGES) ---
+    window.addEventListener('beforeunload', function (e) {
+      if (hasUnsavedInputs()) {
+        // Moderní prohlížeče vyžadují, aby se nastavila returnValue
+        // Text zprávy se v moderních prohlížečích většinou nezobrazuje (je tam defaultní),
+        // ale nastavení vlastnosti je nutné pro vyvolání dialogu.
+        e.preventDefault();
+        e.returnValue = ''; 
+      }
+    });
+
+    function hasUnsavedInputs() {
+      // Projde všechny inputy a zjistí, jestli je v nich nějaká hodnota
+      const inputs = document.querySelectorAll('input.qty-input');
+      for (let input of inputs) {
+        if (input.value !== "" && input.value !== null) {
+          return true; // Našel nevyprázdněný input
+        }
+      }
+      return false; // Vše je čisté
+    }
+
+
     // --- KONFIGURACE A DATA ---
     const defaultItems = [
       "4:1", "10:1", "Filet-O-Fish", "Slanina dlouha", "Slaninové kousky",
@@ -252,6 +276,13 @@
 
     // --- PŘEPÍNÁNÍ SEZNAMŮ ---
     function switchListType(type) {
+      // Před přepnutím zkontrolujeme neuložená data
+      if (hasUnsavedInputs()) {
+        if (!confirm("Máte v políčkách nevyplněná čísla, která se přepnutím ztratí. Opravdu přepnout?")) {
+          return; // Zrušit přepnutí
+        }
+      }
+
       currentType = type;
       localStorage.setItem("currentListType_v5", type); // Zapamatovat si volbu
       
