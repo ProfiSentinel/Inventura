@@ -40,20 +40,19 @@
 
     .header-controls {
       display: flex;
-      gap: 5px;
+      gap: 10px;
     }
     
     button {
       border: none;
       border-radius: 4px;
-      padding: 8px 12px;
+      padding: 8px 15px;
       font-weight: bold;
       cursor: pointer;
       font-size: 13px;
     }
     .btn-edit { background: #3498db; color: white; }
     .btn-reset { background: #7f8c8d; color: white; }
-    .btn-copy { background: #f39c12; color: white; }
 
     /* PŘEPÍNAČ REŽIMU +/- */
     .mode-switch {
@@ -208,8 +207,7 @@
     <div class="header-top">
       <h2>Inventura</h2>
       <div class="header-controls">
-        <button class="btn-copy" onclick="copyToClipboard()" title="Kopírovat">📋</button>
-        <button class="btn-edit" onclick="openEditModal()">✏️ Upravit</button>
+        <button class="btn-edit" onclick="openEditModal()">✏️ Upravit seznam</button>
         <button class="btn-reset" onclick="resetInventory()">🔄 Reset</button>
       </div>
     </div>
@@ -419,7 +417,7 @@
       }
     }
 
-    // --- RESET A KOPIROVANI ---
+    // --- RESET ---
 
     function resetInventory() {
       if (confirm("Opravdu vynulovat všechny počty? Seznam položek zůstane.")) {
@@ -429,23 +427,6 @@
         saveData();
         renderTable();
       }
-    }
-
-    function copyToClipboard() {
-      let text = "INVENTURA:\n\n";
-      let hasData = false;
-      itemList.forEach(item => {
-        const i = inventory[item];
-        if (i.pack !== 0 || i.bag !== 0 || i.pcs !== 0) {
-          text += `${item}: ${i.pack} bal | ${i.bag} sáč | ${i.pcs} ks\n`;
-          hasData = true;
-        }
-      });
-      if (!hasData) text += "Žádná data.";
-      
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Zkopírováno!");
-      }).catch(err => alert("Chyba: " + err));
     }
 
     // Start
