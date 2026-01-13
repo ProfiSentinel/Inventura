@@ -13,10 +13,17 @@
       --active-tab: #34495e;
       --inactive-tab: #ecf0f1;
     }
+    
+    html, body {
+      height: 100%;
+      /* TOTO JE KLÍČOVÁ ÚPRAVA PROTI RELOADU: */
+      overscroll-behavior-y: none; 
+      /* Zabraňuje "pružnému" efektu a gestu obnovení na mobilech */
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       padding: 0; margin: 0; background: var(--bg); color: #333; padding-bottom: 80px;
-      overscroll-behavior-y: contain; /* Prevents pull-to-refresh on some browsers */
     }
 
     /* HEADER */
@@ -220,26 +227,25 @@
   </div>
 
   <script>
-    // --- OCHRANA PŘED RELOADEM (UNSAVED CHANGES) ---
+    // --- OCHRANA PŘED RELOADEM (VYLEPŠENÁ) ---
+    // 1. Ochrana před zavřením/reloadem přes systémový dialog
     window.addEventListener('beforeunload', function (e) {
       if (hasUnsavedInputs()) {
-        // Moderní prohlížeče vyžadují, aby se nastavila returnValue
-        // Text zprávy se v moderních prohlížečích většinou nezobrazuje (je tam defaultní),
-        // ale nastavení vlastnosti je nutné pro vyvolání dialogu.
         e.preventDefault();
-        e.returnValue = ''; 
+        e.returnValue = 'Máte neuložená data!'; // Nutné pro některé prohlížeče
+        return 'Máte neuložená data!';
       }
     });
 
     function hasUnsavedInputs() {
-      // Projde všechny inputy a zjistí, jestli je v nich nějaká hodnota
       const inputs = document.querySelectorAll('input.qty-input');
       for (let input of inputs) {
-        if (input.value !== "" && input.value !== null) {
-          return true; // Našel nevyprázdněný input
+        // Kontroluje, zda je hodnota číselná a není prázdná
+        if (input.value.trim() !== "") {
+          return true;
         }
       }
-      return false; // Vše je čisté
+      return false;
     }
 
 
@@ -256,16 +262,13 @@
       "Vejce", "Salat BM", "Friends-collect", "Káva", "Mléko 3,5%"
     ];
 
-    // Aktuální typ seznamu (daily nebo weekly)
     let currentType = localStorage.getItem("currentListType_v5") || 'daily';
 
-    // Načteme seznamy pro oba typy
     let listData = {
       daily: JSON.parse(localStorage.getItem("inventoryList_daily_v5")) || [...defaultItems],
       weekly: JSON.parse(localStorage.getItem("inventoryList_weekly_v5")) || [...defaultItems]
     };
 
-    // Načteme logy (historii) pro oba typy
     let logData = {
       daily: JSON.parse(localStorage.getItem("inventoryLogs_daily_v5")) || [],
       weekly: JSON.parse(localStorage.getItem("inventoryLogs_weekly_v5")) || []
@@ -276,25 +279,21 @@
 
     // --- PŘEPÍNÁNÍ SEZNAMŮ ---
     function switchListType(type) {
-      // Před přepnutím zkontrolujeme neuložená data
       if (hasUnsavedInputs()) {
-        if (!confirm("Máte v políčkách nevyplněná čísla, která se přepnutím ztratí. Opravdu přepnout?")) {
-          return; // Zrušit přepnutí
+        if (!confirm("Máte rozepsaná čísla. Pokud přepnete seznam, zmizí. Pokračovat?")) {
+          return;
         }
       }
 
       currentType = type;
-      localStorage.setItem("currentListType_v5", type); // Zapamatovat si volbu
+      localStorage.setItem("currentListType_v5", type);
       
-      // Update UI Tabs
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('tab-' + type).classList.add('active');
 
-      // Update Title
       const titleLabel = (type === 'daily') ? 'DENNÍ' : 'TÝDENNÍ';
       document.getElementById('pageTitle').textContent = `${titleLabel} INVENTURA`;
 
-      // Zavřít hledání při přepnutí, aby to nemátlo
       closeSearch();
       renderTable();
     }
@@ -331,7 +330,6 @@
         `;
         tbody.appendChild(row);
 
-        // Enter key listeners
         ['pack', 'bag', 'pcs'].forEach(type => {
           document.getElementById(`${item}-${type}`).addEventListener("keypress", function(e) {
             if (e.key === "Enter") { e.preventDefault(); updateItem(item); }
@@ -339,7 +337,6 @@
         });
       });
       
-      // Aplikovat filtr hledání, pokud je něco zadáno
       const searchVal = document.getElementById('searchInput').value;
       if(searchVal) filterItems(searchVal);
       
@@ -350,7 +347,6 @@
       const totals = {};
       items.forEach(i => totals[i] = { pack: 0, bag: 0, pcs: 0 });
       logs.forEach(log => {
-        // Počítáme jen pokud položka stále existuje v seznamu
         if (totals[log.item]) {
           totals[log.item][log.unit] += log.val;
         }
@@ -369,7 +365,6 @@
         if (!isNaN(val)) {
           if (isSubtractionMode) val = -val;
           
-          // Přidat do logu aktuálního typu
           logData[currentType].push({
             id: Date.now() + Math.random(),
             item: item, unit: unit, val: val,
@@ -389,7 +384,6 @@
     }
 
     function refreshSingleItemDisplay(item) {
-      // Optimalizovaný refresh bez překreslení celé tabulky
       let t = { pack: 0, bag: 0, pcs: 0 };
       logData[currentType].filter(l => l.item === item).forEach(l => t[l.unit] += l.val);
       
@@ -408,7 +402,6 @@
     }
 
     function saveData() {
-      // Ukládáme jen aktuálně modifikovaná data
       localStorage.setItem(`inventoryLogs_${currentType}_v5`, JSON.stringify(logData[currentType]));
       localStorage.setItem(`inventoryList_${currentType}_v5`, JSON.stringify(listData[currentType]));
     }
@@ -457,7 +450,6 @@
     function renderHistoryList() {
       const container = document.getElementById("historyContainer");
       container.innerHTML = "";
-      // Filtrujeme logy aktuálního typu pro danou položku
       const logs = logData[currentType].filter(l => l.item === historyTargetItem).reverse();
 
       if (logs.length === 0) {
