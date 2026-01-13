@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Inventura PRO</title>
+  <title>Inventura PRO + Historie</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     :root {
@@ -46,7 +46,7 @@
     button {
       border: none;
       border-radius: 4px;
-      padding: 8px 15px;
+      padding: 8px 12px;
       font-weight: bold;
       cursor: pointer;
       font-size: 13px;
@@ -71,131 +71,91 @@
       cursor: pointer;
       transition: background 0.3s, color 0.3s;
     }
-    /* Styly pro aktivní režimy */
     body.mode-add .mode-add-btn { background: var(--add-color); color: white; }
     body.mode-add .mode-sub-btn { background: #fff; color: #aaa; }
-    
     body.mode-sub .mode-sub-btn { background: var(--sub-color); color: white; }
     body.mode-sub .mode-add-btn { background: #fff; color: #aaa; }
 
     /* TABULKA */
-    .table-container {
-      margin-top: 5px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-    th {
-      background: #e2e6ea;
-      font-size: 13px;
-      padding: 8px 2px;
-      color: #555;
-    }
-    td {
-      padding: 8px 4px;
-      border-bottom: 1px solid #ddd;
-      text-align: center;
-      vertical-align: middle;
-    }
+    .table-container { margin-top: 5px; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th { background: #e2e6ea; font-size: 13px; padding: 8px 2px; color: #555; }
+    td { padding: 8px 4px; border-bottom: 1px solid #ddd; text-align: center; vertical-align: middle; }
     tr:nth-child(even) { background-color: #fff; }
     tr:nth-child(odd) { background-color: #f8f9fa; }
     
+    /* Položka s možností rozkliku */
     .item-name {
       font-size: 14px;
       font-weight: 600;
       text-align: left;
       padding-left: 8px;
-      color: var(--primary);
+      color: #2980b9; /* Modrá jako odkaz */
       overflow-wrap: break-word;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 3px;
     }
+    .item-name:hover { color: #1abc9c; }
 
     /* INPUTY */
     input {
-      width: 100%;
-      padding: 8px 0;
-      text-align: center;
-      border: 1px solid #bbb;
-      border-radius: 4px;
-      font-size: 18px; /* Větší písmo pro čísla */
-      background: #fff;
-      font-weight: 600;
+      width: 100%; padding: 8px 0; text-align: center;
+      border: 1px solid #bbb; border-radius: 4px;
+      font-size: 18px; background: #fff; font-weight: 600;
     }
-    input:focus {
-      border-color: #3498db;
-      outline: none;
-      background: #e8f8f5;
-    }
+    input:focus { border-color: #3498db; outline: none; background: #e8f8f5; }
 
     /* TOTALY */
     .total-display {
-      display: block;
-      font-weight: 800;
-      color: var(--primary);
-      font-size: 16px;
-      margin-top: 4px;
+      display: block; font-weight: 800; color: var(--primary);
+      font-size: 16px; margin-top: 4px;
     }
-    .updated {
-      animation: pop 0.3s ease-in-out;
-      color: var(--add-color);
-    }
-    @keyframes pop {
-      50% { transform: scale(1.4); }
-    }
+    .updated { animation: pop 0.3s ease-in-out; color: var(--add-color); }
+    @keyframes pop { 50% { transform: scale(1.4); } }
 
     /* TLAČÍTKO OK */
-    .btn-ok {
-      color: white;
-      width: 100%;
-      padding: 10px 0;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
-    /* Barva OK tlačítka se mění podle režimu */
+    .btn-ok { color: white; width: 100%; padding: 10px 0; border-radius: 4px; transition: background 0.2s; }
     body.mode-add .btn-ok { background: var(--add-color); }
     body.mode-sub .btn-ok { background: var(--sub-color); }
 
-    /* MODAL (Okno úprav) */
+    /* --- OBECNÝ MODAL (použitý pro Edit i Historii) --- */
     .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 200;
-      justify-content: center;
-      align-items: center;
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 200;
+      justify-content: center; align-items: center;
     }
     .modal-content {
-      background: white;
-      padding: 20px;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      display: flex;
-      flex-direction: column;
-      height: 80vh;
+      background: white; padding: 20px; width: 90%; max-width: 400px;
+      border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column; max-height: 85vh;
     }
-    .modal-header { font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; }
-    textarea {
-      flex: 1;
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      resize: none;
-      font-family: monospace;
-    }
-    .modal-footer {
-      margin-top: 10px;
-      display: flex;
-      gap: 10px;
-    }
+    .modal-header { font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+    .modal-footer { margin-top: 10px; display: flex; gap: 10px; }
+    
+    /* MODAL PRO SEZNAM */
+    textarea { flex: 1; width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; resize: none; font-family: monospace; min-height: 200px; }
     .btn-save { background: var(--add-color); color: white; flex: 1; padding: 12px; }
     .btn-cancel { background: #95a5a6; color: white; flex: 1; padding: 12px; }
+
+    /* MODAL PRO HISTORII */
+    .history-list {
+      flex: 1; overflow-y: auto; border-top: 1px solid #eee; margin-top: 5px;
+    }
+    .history-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 5px; border-bottom: 1px solid #f0f0f0; font-size: 14px;
+    }
+    .hist-val { font-weight: bold; width: 60px; text-align: right; cursor: pointer; border-bottom: 1px dashed #ccc;}
+    .hist-val.positive { color: var(--add-color); }
+    .hist-val.negative { color: var(--sub-color); }
+    .hist-unit { flex: 1; padding-left: 10px; color: #555; }
+    .btn-del-entry {
+      background: #e74c3c; color: white; width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; padding: 0; font-size: 12px; margin-left: 10px;
+    }
 
     /* Sloupce */
     col.c-name { width: 35%; }
@@ -203,15 +163,16 @@
     col.c-action { width: 11%; }
   </style>
 </head>
-<body class="mode-add"> <header>
+<body class="mode-add">
+
+  <header>
     <div class="header-top">
       <h2>Inventura</h2>
       <div class="header-controls">
-        <button class="btn-edit" onclick="openEditModal()">✏️ Upravit seznam</button>
+        <button class="btn-edit" onclick="openEditListModal()">✏️ Seznam</button>
         <button class="btn-reset" onclick="resetInventory()">🔄 Reset</button>
       </div>
     </div>
-    
     <div class="mode-switch">
       <div class="mode-btn mode-add-btn" onclick="setMode('add')">➕ PŘIDAT</div>
       <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">➖ ODEČÍST</div>
@@ -236,27 +197,40 @@
           <th></th>
         </tr>
       </thead>
-      <tbody id="inventoryTable">
-        </tbody>
+      <tbody id="inventoryTable"></tbody>
     </table>
   </div>
 
-  <div id="editModal" class="modal-overlay">
+  <div id="listModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
         <span>Editace položek</span>
-        <span style="font-size: 12px; font-weight: normal; color: #666;">Každá položka na nový řádek</span>
       </div>
       <textarea id="itemsTextarea"></textarea>
       <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeEditModal()">Zrušit</button>
-        <button class="btn-save" onclick="saveNewList()">ULOŽIT ZMĚNY</button>
+        <button class="btn-cancel" onclick="document.getElementById('listModal').style.display='none'">Zrušit</button>
+        <button class="btn-save" onclick="saveNewList()">ULOŽIT</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span id="historyTitle">Historie</span>
+        <button style="background:none; color:#333; padding:0;" onclick="document.getElementById('historyModal').style.display='none'">✕</button>
+      </div>
+      <div style="font-size: 12px; color: #777; margin-bottom: 5px;">Klikni na číslo pro úpravu, křížek pro smazání.</div>
+      <div id="historyContainer" class="history-list">
+        </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" style="width:100%" onclick="document.getElementById('historyModal').style.display='none'">Zavřít</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Výchozí seznam, pokud uživatel nemá vlastní
+    // Výchozí seznam
     const defaultList = [
       "4:1", "10:1", "Filet-O-Fish", "Slanina dlouha", "Slaninové kousky",
       "Tasticka jablko", "Tasticka boruvka", "English muffin", "Pork maso",
@@ -269,164 +243,235 @@
       "Vejce", "Salat BM", "Friends-collect", "Káva", "Mléko 3,5%"
     ];
 
-    // Načtení seznamu a dat
-    let itemList = JSON.parse(localStorage.getItem("inventoryList_v3")) || defaultList;
-    let inventory = JSON.parse(localStorage.getItem("inventoryData_v3")) || {};
+    // Načtení dat
+    let itemList = JSON.parse(localStorage.getItem("inventoryList_v4")) || defaultList;
+    
+    // ZMĚNA: Data už nejsou jen součty, ale pole logů (transakcí)
+    // Struktura logu: { id: timestamp, item: "4:1", unit: "pack", val: 5 }
+    let inventoryLogs = JSON.parse(localStorage.getItem("inventoryLogs_v1")) || [];
+
     let isSubtractionMode = false;
 
-    // Inicializace chybějících objektů v datech
-    function initData() {
-      itemList.forEach(item => {
-        if (!inventory[item]) inventory[item] = { pack: 0, bag: 0, pcs: 0 };
-      });
-    }
-    initData();
+    // Pomocná funkce pro názvy jednotek
+    const unitNames = { 'pack': 'Balení', 'bag': 'Sáčky', 'pcs': 'Kusy' };
 
-    // Vykreslení
     const tbody = document.getElementById("inventoryTable");
-    
+
+    // --- HLAVNÍ RENDEROVÁNÍ TABULKY ---
     function renderTable() {
       tbody.innerHTML = "";
-      itemList.forEach(item => {
-        // Ošetření, pokud byla položka smazána ze seznamu, ale je v datech (nebo naopak)
-        if (!inventory[item]) inventory[item] = { pack: 0, bag: 0, pcs: 0 };
+      
+      // Spočítáme aktuální součty z logů pro rychlé zobrazení
+      const totals = calculateTotals();
 
+      itemList.forEach(item => {
+        const t = totals[item] || { pack: 0, bag: 0, pcs: 0 };
+        
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td class="item-name">${item}</td>
+          <td class="item-name" onclick="openHistory('${item}')">${item}</td>
           <td>
-            <input type="number" inputmode="decimal" id="${item}-pack" placeholder="">
-            <span class="total-display" id="${item}-pack-total">${inventory[item].pack}</span>
+            <input type="number" inputmode="decimal" id="${item}-pack">
+            <span class="total-display" id="${item}-pack-total">${t.pack}</span>
           </td>
           <td>
-            <input type="number" inputmode="decimal" id="${item}-bag" placeholder="">
-            <span class="total-display" id="${item}-bag-total">${inventory[item].bag}</span>
+            <input type="number" inputmode="decimal" id="${item}-bag">
+            <span class="total-display" id="${item}-bag-total">${t.bag}</span>
           </td>
           <td>
-            <input type="number" inputmode="decimal" id="${item}-pcs" placeholder="">
-            <span class="total-display" id="${item}-pcs-total">${inventory[item].pcs}</span>
+            <input type="number" inputmode="decimal" id="${item}-pcs">
+            <span class="total-display" id="${item}-pcs-total">${t.pcs}</span>
           </td>
-          <td><button class="btn-ok" id="btn-${item}" onclick="updateItem('${item}')">OK</button></td>
+          <td><button class="btn-ok" onclick="updateItem('${item}')">OK</button></td>
         `;
         tbody.appendChild(row);
 
-        // Enter key support
-        [`${item}-pack`, `${item}-bag`, `${item}-pcs`].forEach(id => {
-          document.getElementById(id).addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              updateItem(item);
-            }
+        // Enter support
+        ['pack', 'bag', 'pcs'].forEach(type => {
+          document.getElementById(`${item}-${type}`).addEventListener("keypress", function(e) {
+            if (e.key === "Enter") { e.preventDefault(); updateItem(item); }
           });
         });
       });
       updateOkButtonsText();
     }
 
-    // --- LOGIKA AKTUALIZACE ---
+    // Spočítá součty pro všechny položky z historie
+    function calculateTotals() {
+      const totals = {};
+      itemList.forEach(i => totals[i] = { pack: 0, bag: 0, pcs: 0 });
+      
+      inventoryLogs.forEach(log => {
+        if (totals[log.item]) {
+          totals[log.item][log.unit] += log.val;
+        }
+      });
+      return totals;
+    }
 
+    // --- PŘIDÁNÍ ZÁZNAMU ---
     function updateItem(item) {
       const inputs = ['pack', 'bag', 'pcs'];
       let changed = false;
 
-      inputs.forEach(type => {
-        const inputEl = document.getElementById(`${item}-${type}`);
+      inputs.forEach(unit => {
+        const inputEl = document.getElementById(`${item}-${unit}`);
         let val = parseFloat(inputEl.value);
         
         if (!isNaN(val)) {
-          // Pokud je režim odečítání, otočíme znaménko
-          if (isSubtractionMode) {
-            val = -val;
-          }
+          if (isSubtractionMode) val = -val;
 
-          inventory[item][type] += val;
-          inputEl.value = ""; 
-          
-          // Vizuální efekt
-          const totalEl = document.getElementById(`${item}-${type}-total`);
-          totalEl.textContent = inventory[item][type];
-          totalEl.classList.remove("updated");
-          void totalEl.offsetWidth; // trigger reflow
-          totalEl.classList.add("updated");
-          
+          // Přidání do logu
+          inventoryLogs.push({
+            id: Date.now() + Math.random(), // Unikátní ID
+            item: item,
+            unit: unit,
+            val: val,
+            timestamp: new Date().toISOString()
+          });
+
+          inputEl.value = "";
           changed = true;
+          
+          // Efekt aktualizace čísla
+          highlightChange(`${item}-${unit}-total`);
         }
       });
 
       if (changed) {
         saveData();
+        refreshTotalsDisplay(item); // Obnovit jen čísla u dané položky
       }
     }
 
-    function saveData() {
-      localStorage.setItem("inventoryData_v3", JSON.stringify(inventory));
+    function refreshTotalsDisplay(item) {
+      // Znovu přepočítat jen pro tento item (optimalizace)
+      let t = { pack: 0, bag: 0, pcs: 0 };
+      inventoryLogs.filter(l => l.item === item).forEach(l => t[l.unit] += l.val);
+
+      document.getElementById(`${item}-pack-total`).textContent = t.pack;
+      document.getElementById(`${item}-bag-total`).textContent = t.bag;
+      document.getElementById(`${item}-pcs-total`).textContent = t.pcs;
     }
 
-    // --- LOGIKA REŽIMŮ (+ / -) ---
+    function highlightChange(elementId) {
+      const el = document.getElementById(elementId);
+      el.classList.remove("updated");
+      void el.offsetWidth;
+      el.classList.add("updated");
+    }
+
+    function saveData() {
+      localStorage.setItem("inventoryLogs_v1", JSON.stringify(inventoryLogs));
+    }
+
+    // --- HISTORIE A DETAIL ---
+    let currentHistoryItem = null;
+
+    function openHistory(item) {
+      currentHistoryItem = item;
+      document.getElementById("historyTitle").textContent = "Historie: " + item;
+      renderHistoryList();
+      document.getElementById("historyModal").style.display = "flex";
+    }
+
+    function renderHistoryList() {
+      const container = document.getElementById("historyContainer");
+      container.innerHTML = "";
+
+      // Filtrujeme logy jen pro tuto položku a seřadíme od nejnovějších
+      const logs = inventoryLogs.filter(l => l.item === currentHistoryItem).reverse();
+
+      if (logs.length === 0) {
+        container.innerHTML = "<div style='padding:20px; text-align:center; color:#999'>Žádné záznamy</div>";
+        return;
+      }
+
+      logs.forEach(log => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        
+        const sign = log.val > 0 ? "+" : "";
+        const colorClass = log.val > 0 ? "positive" : "negative";
+
+        div.innerHTML = `
+          <span class="hist-val ${colorClass}" onclick="editLogEntry(${log.id})">${sign}${log.val}</span>
+          <span class="hist-unit">${unitNames[log.unit]}</span>
+          <button class="btn-del-entry" onclick="deleteLogEntry(${log.id})">✕</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function deleteLogEntry(id) {
+      if (confirm("Smazat tento záznam?")) {
+        inventoryLogs = inventoryLogs.filter(l => l.id !== id);
+        saveData();
+        renderHistoryList();
+        refreshTotalsDisplay(currentHistoryItem);
+      }
+    }
+
+    function editLogEntry(id) {
+      const log = inventoryLogs.find(l => l.id === id);
+      if (!log) return;
+
+      const newVal = prompt("Upravit hodnotu (zadej nové číslo):", log.val);
+      if (newVal !== null) {
+        const parsed = parseFloat(newVal);
+        if (!isNaN(parsed)) {
+          log.val = parsed;
+          saveData();
+          renderHistoryList();
+          refreshTotalsDisplay(currentHistoryItem);
+        }
+      }
+    }
+
+    // --- SPRÁVA SEZNAMU ---
+    function openEditListModal() {
+      document.getElementById("itemsTextarea").value = itemList.join("\n");
+      document.getElementById("listModal").style.display = "flex";
+    }
+
+    function saveNewList() {
+      const rawText = document.getElementById("itemsTextarea").value;
+      const newItems = rawText.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+
+      if (newItems.length === 0) { alert("Seznam nesmí být prázdný"); return; }
+      
+      if (confirm("Uložit nový seznam? Historie u položek se stejným názvem zůstane.")) {
+        itemList = newItems;
+        localStorage.setItem("inventoryList_v4", JSON.stringify(itemList));
+        document.getElementById("listModal").style.display = "none";
+        renderTable();
+      }
+    }
+
+    // --- RESET A REŽIMY ---
+    function resetInventory() {
+      if (confirm("Opravdu smazat celou historii inventury a začít od nuly?")) {
+        inventoryLogs = [];
+        saveData();
+        renderTable();
+      }
+    }
 
     function setMode(mode) {
       const body = document.body;
-      if (mode === 'sub') {
-        body.classList.remove('mode-add');
-        body.classList.add('mode-sub');
-        isSubtractionMode = true;
+      isSubtractionMode = (mode === 'sub');
+      if (isSubtractionMode) {
+        body.classList.remove('mode-add'); body.classList.add('mode-sub');
       } else {
-        body.classList.remove('mode-sub');
-        body.classList.add('mode-add');
-        isSubtractionMode = false;
+        body.classList.remove('mode-sub'); body.classList.add('mode-add');
       }
       updateOkButtonsText();
     }
 
     function updateOkButtonsText() {
-      const btns = document.querySelectorAll('.btn-ok');
-      btns.forEach(btn => {
+      document.querySelectorAll('.btn-ok').forEach(btn => {
         btn.textContent = isSubtractionMode ? "-" : "OK";
       });
-    }
-
-    // --- EDITOR SEZNAMU ---
-
-    function openEditModal() {
-      const textarea = document.getElementById("itemsTextarea");
-      textarea.value = itemList.join("\n");
-      document.getElementById("editModal").style.display = "flex";
-    }
-
-    function closeEditModal() {
-      document.getElementById("editModal").style.display = "none";
-    }
-
-    function saveNewList() {
-      const rawText = document.getElementById("itemsTextarea").value;
-      // Rozdělit podle řádků a vyčistit prázdné
-      const newItems = rawText.split("\n").map(t => t.trim()).filter(t => t.length > 0);
-
-      if (newItems.length === 0) {
-        alert("Seznam nemůže být prázdný!");
-        return;
-      }
-
-      if (confirm("Uložení nového seznamu změní tabulku. Položky se stejným názvem si zachovají počty, nové budou mít 0. Pokračovat?")) {
-        itemList = newItems;
-        localStorage.setItem("inventoryList_v3", JSON.stringify(itemList));
-        initData(); // Zajistí strukturu pro nové položky
-        saveData(); // Uloží případné změny
-        renderTable();
-        closeEditModal();
-      }
-    }
-
-    // --- RESET ---
-
-    function resetInventory() {
-      if (confirm("Opravdu vynulovat všechny počty? Seznam položek zůstane.")) {
-        itemList.forEach(item => {
-          inventory[item] = { pack: 0, bag: 0, pcs: 0 };
-        });
-        saveData();
-        renderTable();
-      }
     }
 
     // Start
