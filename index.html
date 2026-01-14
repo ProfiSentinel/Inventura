@@ -12,13 +12,14 @@
       --bg: #f4f4f4;
       --active-tab: #34495e;
       --inactive-tab: #ecf0f1;
-      /* Výška sticky ovládání pro výpočet posunu tabulky */
-      --sticky-height: 55px; 
+      
+      /* Dynamická proměnná pro výšku sticky hlavičky - JS ji bude aktualizovat */
+      --sticky-top-offset: 60px; 
     }
     
-    html, body {
-      height: 100%;
-      overscroll-behavior-y: none; /* Zákaz reloadu potažením */
+    html {
+      /* Zabraňuje reloadu "pružinou" na iPhone */
+      overscroll-behavior-y: none;
     }
 
     body {
@@ -26,25 +27,20 @@
       padding: 0; margin: 0; background: var(--bg); color: #333; padding-bottom: 80px;
     }
 
-    /* --- STATICKÁ ČÁST HEADERU (Zmizí při scrollu) --- */
+    /* --- STATICKÁ HLAVIČKA (Odrolovává pryč) --- */
     header {
       background: #fff;
-      /* Už není sticky, odroluje pryč */
       position: relative; 
       z-index: 101;
     }
     
-    .list-tabs {
-      display: flex; background: #bdc3c7;
-    }
+    .list-tabs { display: flex; background: #bdc3c7; }
     .tab-btn {
       flex: 1; padding: 12px; text-align: center; font-weight: bold; font-size: 14px;
       cursor: pointer; background: var(--inactive-tab); color: #7f8c8d;
       border: none; outline: none; transition: all 0.2s;
     }
-    .tab-btn.active {
-      background: #fff; color: var(--primary); border-bottom: 3px solid var(--primary);
-    }
+    .tab-btn.active { background: #fff; color: var(--primary); border-bottom: 3px solid var(--primary); }
 
     .header-info-row {
       display: flex; justify-content: space-between; align-items: center; 
@@ -59,14 +55,19 @@
     .btn-edit { background: #3498db; }
     .btn-reset { background: #95a5a6; }
 
-    /* --- STICKY ČÁST (Zůstane nahoře) --- */
-    .sticky-controls-wrapper {
+    /* --- STICKY OVLÁDÁNÍ (Zůstává nahoře) --- */
+    /* Toto je ten kontejner, jehož výšku budeme měřit */
+    #sticky-wrapper {
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 1000; /* Musí být hodně vysoké */
       background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      transition: height 0.2s ease;
+    }
+
+    .sticky-inner-content {
       padding: 5px 10px 10px 10px;
-      box-shadow: 0 4px 5px -2px rgba(0,0,0,0.1); /* Stín pouze dole */
     }
 
     /* MODE SWITCH (+/-) */
@@ -83,14 +84,10 @@
     body.mode-sub .mode-add-btn { background: #fff; color: #aaa; }
 
     /* SEARCH BAR */
-    #searchBar { 
-      display: none; 
-      padding-bottom: 10px; /* Mezera mezi hledáním a tlačítky */
-    }
+    #searchBar { display: none; padding-bottom: 10px; }
     .search-input-wrapper { position: relative; display: flex; align-items: center; }
     #searchInput { width: 100%; padding: 8px; font-size: 16px; border: 2px solid #3498db; border-radius: 6px; outline: none; }
     .search-close { position: absolute; right: 8px; background: none; font-size: 18px; color: #999; border: none; padding: 5px; }
-
 
     /* FAB Search Button */
     .fab-search {
@@ -107,13 +104,12 @@
     
     th { 
       background: #e2e6ea; font-size: 12px; padding: 8px 2px; color: #555; 
-      /* Sticky header tabulky */
+      /* Zde je to kouzlo: top se bere z proměnné */
       position: sticky;
-      /* Musí být posunutý o výšku sticky-controls-wrapper, aby nebyl schovaný pod ním. 
-         Zde dáváme odhadem 58px. */
-      top: 58px; 
-      z-index: 90;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      top: var(--sticky-top-offset);
+      z-index: 900;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      border-bottom: 1px solid #ccc;
     }
     
     td { padding: 8px 4px; border-bottom: 1px solid #ddd; text-align: center; vertical-align: middle; }
@@ -142,7 +138,7 @@
     /* MODALY */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;
     }
     .modal-content {
       background: white; padding: 20px; width: 90%; max-width: 400px;
@@ -186,17 +182,19 @@
     </div>
   </header>
 
-  <div class="sticky-controls-wrapper">
-    <div id="searchBar">
-      <div class="search-input-wrapper">
-        <input type="text" id="searchInput" placeholder="Hledat položku..." autocomplete="off">
-        <button class="search-close" onclick="closeSearch()">✕</button>
+  <div id="sticky-wrapper">
+    <div class="sticky-inner-content">
+      <div id="searchBar">
+        <div class="search-input-wrapper">
+          <input type="text" id="searchInput" placeholder="Hledat položku..." autocomplete="off">
+          <button class="search-close" onclick="closeSearch()">✕</button>
+        </div>
       </div>
-    </div>
 
-    <div class="mode-switch">
-      <div class="mode-btn mode-add-btn" onclick="setMode('add')">➕ PŘIDAT</div>
-      <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">➖ ODEČÍST</div>
+      <div class="mode-switch">
+        <div class="mode-btn mode-add-btn" onclick="setMode('add')">➕ PŘIDAT</div>
+        <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">➖ ODEČÍST</div>
+      </div>
     </div>
   </div>
 
@@ -268,6 +266,20 @@
       }
       return false;
     }
+
+    // --- DYNAMICKÁ KALKULACE STICKY POZICE (NOVINKA) ---
+    // Toto zajistí, že tabulka se přilepí přesně pod ovládací prvky, ať jsou jakkoliv vysoké
+    const stickyWrapper = document.getElementById('sticky-wrapper');
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        // Získáme aktuální výšku ovládacího panelu
+        const height = entry.contentRect.height;
+        // Nastavíme CSS proměnnou, kterou používá 'th' v top: var(...)
+        document.documentElement.style.setProperty('--sticky-top-offset', `${height}px`);
+      }
+    });
+    // Spustíme sledování
+    resizeObserver.observe(stickyWrapper);
 
 
     // --- DATA ---
