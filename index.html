@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Inventura: Denní/Týdenní</title>
+  <title>Inventura: Denní/Týdenní/Čtvrtek</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     :root {
@@ -36,10 +36,12 @@
     
     .list-tabs { display: flex; background: #bdc3c7; }
     .tab-btn {
-      flex: 1; padding: 12px; text-align: center; font-weight: bold; font-size: 14px;
+      flex: 1; padding: 12px 2px; text-align: center; font-weight: bold; font-size: 13px;
       cursor: pointer; background: var(--inactive-tab); color: #7f8c8d;
       border: none; outline: none; transition: all 0.2s;
+      border-right: 1px solid #dcdcdc;
     }
+    .tab-btn:last-child { border-right: none; }
     .tab-btn.active { background: #fff; color: var(--primary); border-bottom: 3px solid var(--primary); }
 
     .header-info-row {
@@ -56,11 +58,10 @@
     .btn-reset { background: #95a5a6; }
 
     /* --- STICKY OVLÁDÁNÍ (Zůstává nahoře) --- */
-    /* Toto je ten kontejner, jehož výšku budeme měřit */
     #sticky-wrapper {
       position: sticky;
       top: 0;
-      z-index: 1000; /* Musí být hodně vysoké */
+      z-index: 1000;
       background: #fff;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
       transition: height 0.2s ease;
@@ -104,7 +105,6 @@
     
     th { 
       background: #e2e6ea; font-size: 12px; padding: 8px 2px; color: #555; 
-      /* Zde je to kouzlo: top se bere z proměnné */
       position: sticky;
       top: var(--sticky-top-offset);
       z-index: 900;
@@ -171,6 +171,7 @@
     <div class="list-tabs">
       <button class="tab-btn active" id="tab-daily" onclick="switchListType('daily')">DENNÍ</button>
       <button class="tab-btn" id="tab-weekly" onclick="switchListType('weekly')">TÝDENNÍ</button>
+      <button class="tab-btn" id="tab-thursday" onclick="switchListType('thursday')">ČTVRTEK</button>
     </div>
 
     <div class="header-info-row">
@@ -267,44 +268,48 @@
       return false;
     }
 
-    // --- DYNAMICKÁ KALKULACE STICKY POZICE (NOVINKA) ---
-    // Toto zajistí, že tabulka se přilepí přesně pod ovládací prvky, ať jsou jakkoliv vysoké
+    // --- DYNAMICKÁ KALKULACE STICKY POZICE ---
     const stickyWrapper = document.getElementById('sticky-wrapper');
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
-        // Získáme aktuální výšku ovládacího panelu
         const height = entry.contentRect.height;
-        // Nastavíme CSS proměnnou, kterou používá 'th' v top: var(...)
         document.documentElement.style.setProperty('--sticky-top-offset', `${height}px`);
       }
     });
-    // Spustíme sledování
     resizeObserver.observe(stickyWrapper);
 
 
-    // --- DATA ---
+    // --- DATA (NOVÝ SEZNAM DLE FOTEK) ---
     const defaultItems = [
-      "4:1", "10:1", "Filet-O-Fish", "Slanina dlouha", "Slaninové kousky",
-      "Tasticka jablko", "Tasticka boruvka", "English muffin", "Pork maso",
-      "Hashbrown", "Tortilla 20cm", "Tortilla 25cm", "Kureci Nuggety(15s)",
-      "Hermelínky", "Smaž. sýr", "Rosti patty", "Grill kureci(12s)",
-      "Value maso", "McCrispy maso", "Stripsy(21s)", "Premiere", "Hranolky",
-      "Omacka Quaca", "QP", "Sýr slanina žemle", "Crispy zemle", "BM", "RG",
-      "Rucola", "Cibule cerstva", "Rajcata krajena", "Salat.smes", "Batavia",
-      "Shake", "Sundae", "Str.cheddar", "Ched.platky", "Sýr white ched.",
-      "Vejce", "Salat BM", "Friends-collect", "Káva", "Mléko 3,5%"
+      "4:1 Maso", "10:1 Maso", "Tortilla 20cm", "Tortilla 25cm", 
+      "Kureci Nugety", "Hermelinky", "Smazeny Syr Eid", "Rosti Patty", 
+      "Grilled Kureci Maso", "Maso Value Chicken", "Maso Kureci McCrispy", 
+      "Stripsy Kureci", "Premiere Chicken", "Hranolky 12.5kg", 
+      "Omacka Guacamol", "Zemle Syr Sla 2x2", "Zemle McCrispy", 
+      "Zemle BM Best Burger", "Zemle QP Best Burger", "Zemle RG Best Burger", 
+      "Rucola", "Okurky Krajene", "Cibule Cerstva", "Cherry Rajcata", 
+      "Rajcata Krajena", "Kit Kat Posypka", "Lentilky Mini", 
+      "Salatova Smes S", "Salat Batavia", "Shake Mix", "Sundae Mix", 
+      "Strouhany Cheddar", "Syr Cheddar Platky", "Syr White Chedd", 
+      "Vejce Cerstva", "Salat BM", "Friends-Collect", "Friends-Hrnek 3", 
+      "Zero Coca Cola 5L", "Cola 20 Litru", "Lipton IceTea 10 Lit", 
+      "Spritte 5 Litru", "Fanta 5 Litru", "Kava Espresso 6", 
+      "C-Mleko 3,5%", "C-Cokoladova Ko"
     ];
 
     let currentType = localStorage.getItem("currentListType_v5") || 'daily';
 
+    // Inicializace pro všechny tři typy
     let listData = {
       daily: JSON.parse(localStorage.getItem("inventoryList_daily_v5")) || [...defaultItems],
-      weekly: JSON.parse(localStorage.getItem("inventoryList_weekly_v5")) || [...defaultItems]
+      weekly: JSON.parse(localStorage.getItem("inventoryList_weekly_v5")) || [...defaultItems],
+      thursday: JSON.parse(localStorage.getItem("inventoryList_thursday_v5")) || [...defaultItems]
     };
 
     let logData = {
       daily: JSON.parse(localStorage.getItem("inventoryLogs_daily_v5")) || [],
-      weekly: JSON.parse(localStorage.getItem("inventoryLogs_weekly_v5")) || []
+      weekly: JSON.parse(localStorage.getItem("inventoryLogs_weekly_v5")) || [],
+      thursday: JSON.parse(localStorage.getItem("inventoryLogs_thursday_v5")) || []
     };
 
     let isSubtractionMode = false;
@@ -319,10 +324,15 @@
       currentType = type;
       localStorage.setItem("currentListType_v5", type);
       
+      // Reset active tabs
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('tab-' + type).classList.add('active');
 
-      const titleLabel = (type === 'daily') ? 'DENNÍ' : 'TÝDENNÍ';
+      // Update Title
+      let titleLabel = 'DENNÍ';
+      if (type === 'weekly') titleLabel = 'TÝDENNÍ';
+      if (type === 'thursday') titleLabel = 'ČTVRTEK';
+      
       document.getElementById('pageTitle').textContent = `${titleLabel} INVENTURA`;
 
       closeSearch();
@@ -528,7 +538,10 @@
 
     // --- EDITACE SEZNAMU ---
     function openEditListModal() {
-      const title = (currentType === 'daily') ? 'Denní' : 'Týdenní';
+      let title = 'Denní';
+      if (currentType === 'weekly') title = 'Týdenní';
+      if (currentType === 'thursday') title = 'Čtvrtek';
+      
       document.getElementById('editModalTitle').textContent = `Editace: ${title} seznam`;
       document.getElementById("itemsTextarea").value = listData[currentType].join("\n");
       document.getElementById("listModal").style.display = "flex";
@@ -540,7 +553,11 @@
       
       if (newItems.length === 0) { alert("Seznam nesmí být prázdný"); return; }
       
-      if (confirm(`Uložit změny pro ${currentType === 'daily' ? 'Denní' : 'Týdenní'} seznam?`)) {
+      let title = 'Denní';
+      if (currentType === 'weekly') title = 'Týdenní';
+      if (currentType === 'thursday') title = 'Čtvrtek';
+
+      if (confirm(`Uložit změny pro ${title} seznam?`)) {
         listData[currentType] = newItems;
         saveData();
         document.getElementById("listModal").style.display = "none";
@@ -550,7 +567,10 @@
 
     // --- RESET A MODES ---
     function resetInventory() {
-      const label = (currentType === 'daily') ? 'DENNÍ' : 'TÝDENNÍ';
+      let label = 'DENNÍ';
+      if (currentType === 'weekly') label = 'TÝDENNÍ';
+      if (currentType === 'thursday') label = 'ČTVRTEK';
+
       if (confirm(`Opravdu vynulovat data pouze pro ${label} inventuru?`)) {
         logData[currentType] = [];
         saveData();
