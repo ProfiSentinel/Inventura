@@ -4,166 +4,10 @@
   <meta charset="UTF-8">
   <title>Inventura: Denní/Týdenní/Pondělí/Středa/Čtvrtek</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <style>
-    :root {
-      --primary: #2c3e50;
-      --add-color: #27ae60;
-      --sub-color: #c0392b;
-      --bg: #f4f4f4;
-      --active-tab: #34495e;
-      --inactive-tab: #ecf0f1;
-      
-      /* Dynamická proměnná pro výšku sticky hlavičky */
-      --sticky-top-offset: 60px; 
-    }
-    
-    html {
-      /* Zabraňuje reloadu "pružinou" na iPhone */
-      overscroll-behavior-y: none;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 0; margin: 0; background: var(--bg); color: #333; padding-bottom: 80px;
-    }
-
-    /* --- STATICKÁ HLAVIČKA --- */
-    header {
-      background: #fff;
-      position: relative; 
-      z-index: 101;
-    }
-    
-    .list-tabs { display: flex; background: #bdc3c7; }
-    .tab-btn {
-      flex: 1; padding: 12px 1px; text-align: center; font-weight: bold; font-size: 11px; /* Zmenšeno písmo aby se vešlo 5 tlačítek */
-      cursor: pointer; background: var(--inactive-tab); color: #7f8c8d;
-      border: none; outline: none; transition: all 0.2s;
-      border-right: 1px solid #dcdcdc;
-    }
-    .tab-btn:last-child { border-right: none; }
-    .tab-btn.active { background: #fff; color: var(--primary); border-bottom: 3px solid var(--primary); }
-
-    .header-info-row {
-      display: flex; justify-content: space-between; align-items: center; 
-      padding: 10px; border-bottom: 1px solid #eee;
-    }
-    h2 { margin: 0; font-size: 18px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .header-controls { display: flex; gap: 8px; }
-    button.ctrl-btn {
-      border: none; border-radius: 4px; padding: 6px 10px; font-weight: bold; cursor: pointer; font-size: 12px; color: white;
-    }
-    .btn-edit { background: #3498db; }
-    .btn-reset { background: #95a5a6; }
-
-    /* --- STICKY OVLÁDÁNÍ --- */
-    #sticky-wrapper {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      transition: height 0.2s ease;
-    }
-
-    .sticky-inner-content {
-      padding: 5px 10px 10px 10px;
-    }
-
-    /* MODE SWITCH (+/-) */
-    .mode-switch {
-      display: flex; width: 100%; border-radius: 6px; overflow: hidden; border: 1px solid #ddd;
-    }
-    .mode-btn {
-      flex: 1; padding: 10px 0; text-align: center; font-weight: bold; font-size: 16px; 
-      cursor: pointer; transition: background 0.2s, color 0.2s;
-    }
-    body.mode-add .mode-add-btn { background: var(--add-color); color: white; }
-    body.mode-add .mode-sub-btn { background: #fff; color: #aaa; }
-    body.mode-sub .mode-sub-btn { background: var(--sub-color); color: white; }
-    body.mode-sub .mode-add-btn { background: #fff; color: #aaa; }
-
-    /* SEARCH BAR */
-    #searchBar { display: none; padding-bottom: 10px; }
-    .search-input-wrapper { position: relative; display: flex; align-items: center; }
-    #searchInput { width: 100%; padding: 8px; font-size: 16px; border: 2px solid #3498db; border-radius: 6px; outline: none; }
-    .search-close { position: absolute; right: 8px; background: none; font-size: 18px; color: #999; border: none; padding: 5px; }
-
-    /* FAB Search Button */
-    .fab-search {
-      position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
-      background-color: #3498db; color: white; border-radius: 50%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center;
-      font-size: 22px; cursor: pointer; z-index: 150; transition: transform 0.2s;
-    }
-    .fab-search:active { transform: scale(0.9); }
-
-    /* TABULKA */
-    .table-container { margin-top: 0; }
-    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    
-    th { 
-      background: #e2e6ea; font-size: 12px; padding: 8px 2px; color: #555; 
-      position: sticky;
-      top: var(--sticky-top-offset);
-      z-index: 900;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      border-bottom: 1px solid #ccc;
-    }
-    
-    td { padding: 8px 4px; border-bottom: 1px solid #ddd; text-align: center; vertical-align: middle; }
-    tr.hidden { display: none; }
-    
-    .item-name {
-      font-size: 14px; font-weight: 600; text-align: left; padding-left: 8px;
-      color: #2980b9; overflow-wrap: break-word; cursor: pointer;
-      text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px;
-    }
-    
-    input.qty-input {
-      width: 100%; padding: 8px 0; text-align: center;
-      border: 1px solid #bbb; border-radius: 4px; font-size: 18px; background: #fff; font-weight: 600;
-    }
-    input.qty-input:focus { border-color: #3498db; outline: none; background: #e8f8f5; }
-
-    .total-display { display: block; font-weight: 800; color: var(--primary); font-size: 15px; margin-top: 4px; }
-    .updated { animation: pop 0.3s ease-in-out; color: var(--add-color); }
-    @keyframes pop { 50% { transform: scale(1.4); } }
-
-    .btn-ok { color: white; width: 100%; padding: 10px 0; border-radius: 4px; border:none; transition: background 0.2s; font-weight: bold;}
-    body.mode-add .btn-ok { background: var(--add-color); }
-    body.mode-sub .btn-ok { background: var(--sub-color); }
-
-    /* MODALY */
-    .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;
-    }
-    .modal-content {
-      background: white; padding: 20px; width: 90%; max-width: 400px;
-      border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      display: flex; flex-direction: column; max-height: 85vh;
-    }
-    .modal-header { font-weight: bold; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
-    .modal-footer { margin-top: 10px; display: flex; gap: 10px; }
-    textarea { flex: 1; width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; resize: none; font-family: monospace; min-height: 200px; }
-    .btn-save { background: var(--add-color); color: white; flex: 1; padding: 12px; border:none; border-radius:4px;}
-    .btn-cancel { background: #95a5a6; color: white; flex: 1; padding: 12px; border:none; border-radius:4px;}
-
-    /* HISTORIE */
-    .history-list { flex: 1; overflow-y: auto; border-top: 1px solid #eee; margin-top: 5px; }
-    .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-    .hist-val { font-weight: bold; width: 60px; text-align: right; cursor: pointer; border-bottom: 1px dashed #ccc;}
-    .hist-val.positive { color: var(--add-color); }
-    .hist-val.negative { color: var(--sub-color); }
-    .hist-unit { flex: 1; padding-left: 10px; color: #555; }
-    .btn-del-entry { background: #e74c3c; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; padding: 0; font-size: 12px; margin-left: 10px; border:none;}
-
-    col.c-name { width: 34%; }
-    col.c-input { width: 19%; }
-    col.c-action { width: 11%; }
-  </style>
+  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css"> 
 </head>
 <body class="mode-add">
 
@@ -179,8 +23,12 @@
     <div class="header-info-row">
       <h2 id="pageTitle">Denní inventura</h2>
       <div class="header-controls">
-        <button class="ctrl-btn btn-edit" onclick="openEditListModal()">✏️ Seznam</button>
-        <button class="ctrl-btn btn-reset" onclick="resetInventory()">🔄 Reset</button>
+        <button class="ctrl-btn btn-edit" onclick="openEditListModal()">
+          <i class="fas fa-edit"></i> Seznam
+        </button>
+        <button class="ctrl-btn btn-reset" onclick="resetInventory()">
+          <i class="fas fa-sync-alt"></i> Reset
+        </button>
       </div>
     </div>
   </header>
@@ -189,14 +37,19 @@
     <div class="sticky-inner-content">
       <div id="searchBar">
         <div class="search-input-wrapper">
+          <i class="fas fa-search search-icon-left"></i>
           <input type="text" id="searchInput" placeholder="Hledat položku..." autocomplete="off">
-          <button class="search-close" onclick="closeSearch()">✕</button>
+          <button class="search-close" onclick="closeSearch()"><i class="fas fa-times"></i></button>
         </div>
       </div>
 
       <div class="mode-switch">
-        <div class="mode-btn mode-add-btn" onclick="setMode('add')">➕ PŘIDAT</div>
-        <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">➖ ODEČÍST</div>
+        <div class="mode-btn mode-add-btn" onclick="setMode('add')">
+          <i class="fas fa-plus"></i> PŘIDAT
+        </div>
+        <div class="mode-btn mode-sub-btn" onclick="setMode('sub')">
+          <i class="fas fa-minus"></i> ODEČÍST
+        </div>
       </div>
     </div>
   </div>
@@ -223,17 +76,22 @@
     </table>
   </div>
 
-  <div class="fab-search" onclick="toggleSearch()">🔍</div>
+  <div class="fab-search" onclick="toggleSearch()">
+    <i class="fas fa-search"></i>
+  </div>
 
   <div id="listModal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
         <span id="editModalTitle">Editace seznamu</span>
+        <button class="modal-close-btn" onclick="document.getElementById('listModal').style.display='none'">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
       <textarea id="itemsTextarea"></textarea>
       <div class="modal-footer">
         <button class="btn-cancel" onclick="document.getElementById('listModal').style.display='none'">Zrušit</button>
-        <button class="btn-save" onclick="saveNewList()">ULOŽIT</button>
+        <button class="btn-save" onclick="saveNewList()"><i class="fas fa-save"></i> ULOŽIT</button>
       </div>
     </div>
   </div>
@@ -242,9 +100,11 @@
     <div class="modal-content">
       <div class="modal-header">
         <span id="historyTitle">Historie</span>
-        <button style="background:none; color:#333; padding:0; border:none; font-size:18px;" onclick="document.getElementById('historyModal').style.display='none'">✕</button>
+        <button class="modal-close-btn" onclick="document.getElementById('historyModal').style.display='none'">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-      <div style="font-size: 12px; color: #777; margin-bottom: 5px;">Klikni na číslo pro úpravu, křížek pro smazání.</div>
+      <div style="font-size: 12px; color: #777; margin-bottom: 5px;">Klikni na číslo pro úpravu.</div>
       <div id="historyContainer" class="history-list"></div>
       <div class="modal-footer">
         <button class="btn-cancel" style="width:100%" onclick="document.getElementById('historyModal').style.display='none'">Zavřít</button>
@@ -252,387 +112,6 @@
     </div>
   </div>
 
-  <script>
-    // --- OCHRANA PŘED RELOADEM ---
-    window.addEventListener('beforeunload', function (e) {
-      if (hasUnsavedInputs()) {
-        e.preventDefault();
-        e.returnValue = 'Máte neuložená data!'; 
-        return 'Máte neuložená data!';
-      }
-    });
-
-    function hasUnsavedInputs() {
-      const inputs = document.querySelectorAll('input.qty-input');
-      for (let input of inputs) {
-        if (input.value.trim() !== "") return true;
-      }
-      return false;
-    }
-
-    // --- DYNAMICKÁ KALKULACE STICKY POZICE ---
-    const stickyWrapper = document.getElementById('sticky-wrapper');
-    const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        const height = entry.contentRect.height;
-        document.documentElement.style.setProperty('--sticky-top-offset', `${height}px`);
-      }
-    });
-    resizeObserver.observe(stickyWrapper);
-
-
-    // --- DATA ---
-    const defaultItems = [
-      "C-Mlekalprosoya", "4:1 Maso", "10:1 Maso", "Maso Filet O Fi", 
-      "Slanina Dlouha", "Slaninove Kousk", "Tasticka Jablko", "Tasticka Boruvk", 
-      "English Muffin", "Zemle Bagel", "Pork Maso", "Hashbrown", 
-      "Tortilla 20cm", "Tortilla 25cm", "Livance 40ks", "Bez Lepku Zemle", 
-      "Kureci Nugety", "Hermelinky", "Smazeny Syr Eid", "Rosti Patty", 
-      "Grilled Kureci Maso", "Maso Value Chicken", "Maso Kureci McCrispy", 
-      "Stripsy Kureci", "Maso Kureci Str", "Premiere Chicken", "Maso Premier Ch", 
-      "Hranolky 12.5kg", "Omacka Guacamol", "ZemleSyrSla2x2", "Zemle McCrispy", 
-      "Zemle BM Best Burger", "Zemle QP Best Burger", "Zemle RG Best Burger", 
-      "Nudlicky Sun. Chlaz.", "Platky Sunka Chlaz.", "Lucina Kremova", "Maslo Meggle", 
-      "Rucola", "Okurky Krajene", "Cibule Cerstva", "Okurky Nakladane", 
-      "Pribinacek 15x0,125", "Omacka FF 830ks", "Kecup Porcovany", "Cherry Rajcata", 
-      "Rajcata Krajena", "Kecup 10 L", "Kit Kat Posypka", "Lotus Posypka", 
-      "Lentilky Mini", "Jalapenos Papricky", "Salatova Smes S", "Salat Batavia", 
-      "Shake Mix", "Sundae Mix", "Sladkokysely Dip 125", "Omacka Habanero", 
-      "Omacka Dorblu 6", "Strouhany Cheddar", "Syr Cheddar Platky", "Syr White Chedd", 
-      "Vanilka Sirup 12 kg", "Coko Sirup 12 kg", "Jahoda Sirup 12 kg", "Coko Poleva", 
-      "Karamel Poleva", "Jahoda Poleva", "BM Omacka", "Sandwich Omacka", 
-      "Tasty Omacka", "Sweet-Chilli Omacka", "Omacka Carolina BBQ", "Omacka Med&Horc", 
-      "Omacka Creamy B", "Omacka Cheddar", "Omacka Big Rost", "Vejce Cerstva", 
-      "Horcice 15 kg", "Hellmans Tatarka", "Koktejlova Zalivka", "Ceasar Zalivka", 
-      "Jogurtova Zalivka", "Syrova Zalivka", "Zalivka Olivovy Olej", "Zalivka Balsamico", 
-      "Omacka Tartar", "Omacka Cesnek 6", "Omacka Horcice/Bazal", "Omacka Tomato/Oregan", 
-      "Kari Dip 125 ks", "BBQ Dip 125ks", "Omacka Barbecue", "Omacka Swiss K", 
-      "BrusinkovaOmac", "Dip Chilli-Lemon 125", "Horcicovy Dip 125ks", "Omacka Marinara", 
-      "Deluxe Omacka", "Salat BM", "Rajec Neperlivy", "Rajec Jemne Perlivy", 
-      "Pomeranc Dzus Chlaz.", "Jablecny Dzus Chlaz.", "Friends-Collect", "Friends-Hrnek 3", 
-      "Tuk Tekuty 15L", "Zero Coca Cola 5L", "Cola 20 Litru", "Lipton IceTea 10 Lit", 
-      "Sprite 5 Litru", "Fanta 5 Litru", "Box Filet Fish", "Krutony Salatove", 
-      "Susena Cibule", "Cibule Smazena", "Kornout Zmrzlinovy", "C-Bezkofeinkava", 
-      "C-Vanilla Prase", "Sipkovy Lipton Caj", "Matovy Lipton Caj", "Zeleny Lipton Caj", 
-      "English Br. Lipton", "C-Kokos Prichut", "Vanilka Prichut", "Sirup Toasted M", 
-      "C-Coko Prichut", "C-Karamel Prichut", "Orisek Prichut", "Kava Espresso 6", 
-      "C-Horka Cokolada", "C-Cukr Hnedy", "Cukr Bily", "C-Citrony 1kg", 
-      "Smetana 240x10g", "Smetana 1L", "Jahoda Dzem", "Nutella", 
-      "Merunka Dzem", "Citronstava 100", "Med Kvetovany 8", "C-Mleko Ovesne", 
-      "C-Mleko Bezlakt", "C-Mleko 3,5%", "C-Croissant", "C-Cokoladova Ko", 
-      "C-Jahoda Cheesecake", "C-Jablecny Dort Kara", "C-Misa Rez 48ks", "C-Bananchleb", 
-      "Srdicko 532ks", "Muffin Tresen 1", "C-Cheese Cake", "C-Dort Mrkvovy", 
-      "Koblizky Mini M", "C-Nugat Koblizky", "C-Triple Cookies", "Koblizek Dubai", 
-      "C-Cookie Choc C"
-    ];
-
-    let currentType = localStorage.getItem("currentListType_v5") || 'daily';
-
-    // Inicializace pro všechny PĚT typů
-    let listData = {
-      daily: JSON.parse(localStorage.getItem("inventoryList_daily_v5")) || [...defaultItems],
-      weekly: JSON.parse(localStorage.getItem("inventoryList_weekly_v5")) || [...defaultItems],
-      monday: JSON.parse(localStorage.getItem("inventoryList_monday_v5")) || [...defaultItems],
-      wednesday: JSON.parse(localStorage.getItem("inventoryList_wednesday_v5")) || [...defaultItems],
-      thursday: JSON.parse(localStorage.getItem("inventoryList_thursday_v5")) || [...defaultItems]
-    };
-
-    let logData = {
-      daily: JSON.parse(localStorage.getItem("inventoryLogs_daily_v5")) || [],
-      weekly: JSON.parse(localStorage.getItem("inventoryLogs_weekly_v5")) || [],
-      monday: JSON.parse(localStorage.getItem("inventoryLogs_monday_v5")) || [],
-      wednesday: JSON.parse(localStorage.getItem("inventoryLogs_wednesday_v5")) || [],
-      thursday: JSON.parse(localStorage.getItem("inventoryLogs_thursday_v5")) || []
-    };
-
-    let isSubtractionMode = false;
-    const unitNames = { 'pack': 'Balení', 'bag': 'Sáčky', 'pcs': 'Kusy' };
-
-    // --- PŘEPÍNÁNÍ SEZNAMŮ ---
-    function switchListType(type) {
-      if (hasUnsavedInputs()) {
-        if (!confirm("Máte rozepsaná čísla. Pokud přepnete seznam, zmizí. Pokračovat?")) return;
-      }
-
-      currentType = type;
-      localStorage.setItem("currentListType_v5", type);
-      
-      // Reset active tabs
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-' + type).classList.add('active');
-
-      // Update Title
-      let titleLabel = 'DENNÍ';
-      if (type === 'weekly') titleLabel = 'TÝDENNÍ';
-      if (type === 'monday') titleLabel = 'PONDĚLÍ';
-      if (type === 'wednesday') titleLabel = 'STŘEDA';
-      if (type === 'thursday') titleLabel = 'ČTVRTEK';
-      
-      document.getElementById('pageTitle').textContent = `${titleLabel} INVENTURA`;
-
-      closeSearch();
-      renderTable();
-    }
-
-    // --- RENDEROVÁNÍ TABULKY ---
-    const tbody = document.getElementById("inventoryTable");
-
-    function renderTable() {
-      tbody.innerHTML = "";
-      
-      const currentList = listData[currentType];
-      const currentLogs = logData[currentType];
-      
-      const totals = calculateTotals(currentList, currentLogs);
-
-      currentList.forEach(item => {
-        const t = totals[item] || { pack: 0, bag: 0, pcs: 0 };
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td class="item-name" onclick="openHistory('${item}')">${item}</td>
-          <td>
-            <input type="number" inputmode="decimal" class="qty-input" id="${item}-pack">
-            <span class="total-display" id="${item}-pack-total">${t.pack}</span>
-          </td>
-          <td>
-            <input type="number" inputmode="decimal" class="qty-input" id="${item}-bag">
-            <span class="total-display" id="${item}-bag-total">${t.bag}</span>
-          </td>
-          <td>
-            <input type="number" inputmode="decimal" class="qty-input" id="${item}-pcs">
-            <span class="total-display" id="${item}-pcs-total">${t.pcs}</span>
-          </td>
-          <td><button class="btn-ok" onclick="updateItem('${item}')">OK</button></td>
-        `;
-        tbody.appendChild(row);
-
-        ['pack', 'bag', 'pcs'].forEach(type => {
-          document.getElementById(`${item}-${type}`).addEventListener("keypress", function(e) {
-            if (e.key === "Enter") { e.preventDefault(); updateItem(item); }
-          });
-        });
-      });
-      
-      const searchVal = document.getElementById('searchInput').value;
-      if(searchVal) filterItems(searchVal);
-      
-      updateOkButtonsText();
-    }
-
-    function calculateTotals(items, logs) {
-      const totals = {};
-      items.forEach(i => totals[i] = { pack: 0, bag: 0, pcs: 0 });
-      logs.forEach(log => {
-        if (totals[log.item]) {
-          totals[log.item][log.unit] += log.val;
-        }
-      });
-      return totals;
-    }
-
-    // --- UPDATE POLOŽKY ---
-    function updateItem(item) {
-      const inputs = ['pack', 'bag', 'pcs'];
-      let changed = false;
-
-      inputs.forEach(unit => {
-        const inputEl = document.getElementById(`${item}-${unit}`);
-        let val = parseFloat(inputEl.value);
-        if (!isNaN(val)) {
-          if (isSubtractionMode) val = -val;
-          
-          logData[currentType].push({
-            id: Date.now() + Math.random(),
-            item: item, unit: unit, val: val,
-            timestamp: new Date().toISOString()
-          });
-          
-          inputEl.value = "";
-          changed = true;
-          highlightChange(`${item}-${unit}-total`);
-        }
-      });
-
-      if (changed) {
-        saveData();
-        refreshSingleItemDisplay(item);
-      }
-    }
-
-    function refreshSingleItemDisplay(item) {
-      let t = { pack: 0, bag: 0, pcs: 0 };
-      logData[currentType].filter(l => l.item === item).forEach(l => t[l.unit] += l.val);
-      
-      document.getElementById(`${item}-pack-total`).textContent = t.pack;
-      document.getElementById(`${item}-bag-total`).textContent = t.bag;
-      document.getElementById(`${item}-pcs-total`).textContent = t.pcs;
-    }
-
-    function highlightChange(elementId) {
-      const el = document.getElementById(elementId);
-      if(el) {
-        el.classList.remove("updated");
-        void el.offsetWidth;
-        el.classList.add("updated");
-      }
-    }
-
-    function saveData() {
-      localStorage.setItem(`inventoryLogs_${currentType}_v5`, JSON.stringify(logData[currentType]));
-      localStorage.setItem(`inventoryList_${currentType}_v5`, JSON.stringify(listData[currentType]));
-    }
-
-    // --- HLEDÁNÍ ---
-    const searchBar = document.getElementById('searchBar');
-    const searchInput = document.getElementById('searchInput');
-
-    function toggleSearch() {
-      if (searchBar.style.display === 'block') {
-        closeSearch();
-      } else {
-        searchBar.style.display = 'block';
-        searchInput.focus();
-      }
-    }
-
-    function closeSearch() {
-      searchBar.style.display = 'none';
-      searchInput.value = '';
-      filterItems('');
-    }
-
-    searchInput.addEventListener('input', (e) => filterItems(e.target.value));
-
-    function filterItems(query) {
-      const rows = document.querySelectorAll('#inventoryTable tr');
-      const lowerQuery = query.toLowerCase();
-      rows.forEach(row => {
-        const name = row.querySelector('.item-name').textContent.toLowerCase();
-        if (name.includes(lowerQuery)) row.classList.remove('hidden');
-        else row.classList.add('hidden');
-      });
-    }
-
-    // --- HISTORIE ---
-    let historyTargetItem = null;
-
-    function openHistory(item) {
-      historyTargetItem = item;
-      document.getElementById("historyTitle").textContent = item;
-      renderHistoryList();
-      document.getElementById("historyModal").style.display = "flex";
-    }
-
-    function renderHistoryList() {
-      const container = document.getElementById("historyContainer");
-      container.innerHTML = "";
-      const logs = logData[currentType].filter(l => l.item === historyTargetItem).reverse();
-
-      if (logs.length === 0) {
-        container.innerHTML = "<div style='padding:20px; text-align:center; color:#999'>Žádné záznamy v tomto seznamu</div>";
-        return;
-      }
-
-      logs.forEach(log => {
-        const div = document.createElement("div");
-        div.className = "history-item";
-        const sign = log.val > 0 ? "+" : "";
-        const colorClass = log.val > 0 ? "positive" : "negative";
-        div.innerHTML = `
-          <span class="hist-val ${colorClass}" onclick="editLogEntry(${log.id})">${sign}${log.val}</span>
-          <span class="hist-unit">${unitNames[log.unit]}</span>
-          <button class="btn-del-entry" onclick="deleteLogEntry(${log.id})">✕</button>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function deleteLogEntry(id) {
-      if (confirm("Smazat záznam?")) {
-        logData[currentType] = logData[currentType].filter(l => l.id !== id);
-        saveData();
-        renderHistoryList();
-        refreshSingleItemDisplay(historyTargetItem);
-      }
-    }
-
-    function editLogEntry(id) {
-      const log = logData[currentType].find(l => l.id === id);
-      if (!log) return;
-      const newVal = prompt("Nová hodnota:", log.val);
-      if (newVal !== null) {
-        const p = parseFloat(newVal);
-        if (!isNaN(p)) {
-          log.val = p;
-          saveData();
-          renderHistoryList();
-          refreshSingleItemDisplay(historyTargetItem);
-        }
-      }
-    }
-
-    // --- EDITACE SEZNAMU ---
-    function openEditListModal() {
-      let title = 'Denní';
-      if (currentType === 'weekly') title = 'Týdenní';
-      if (currentType === 'monday') title = 'Pondělí';
-      if (currentType === 'wednesday') title = 'Středa';
-      if (currentType === 'thursday') title = 'Čtvrtek';
-      
-      document.getElementById('editModalTitle').textContent = `Editace: ${title} seznam`;
-      document.getElementById("itemsTextarea").value = listData[currentType].join("\n");
-      document.getElementById("listModal").style.display = "flex";
-    }
-
-    function saveNewList() {
-      const rawText = document.getElementById("itemsTextarea").value;
-      const newItems = rawText.split("\n").map(t => t.trim()).filter(t => t.length > 0);
-      
-      if (newItems.length === 0) { alert("Seznam nesmí být prázdný"); return; }
-      
-      let title = 'Denní';
-      if (currentType === 'weekly') title = 'Týdenní';
-      if (currentType === 'monday') title = 'Pondělí';
-      if (currentType === 'wednesday') title = 'Středa';
-      if (currentType === 'thursday') title = 'Čtvrtek';
-
-      if (confirm(`Uložit změny pro ${title} seznam?`)) {
-        listData[currentType] = newItems;
-        saveData();
-        document.getElementById("listModal").style.display = "none";
-        renderTable();
-      }
-    }
-
-    // --- RESET A MODES ---
-    function resetInventory() {
-      let label = 'DENNÍ';
-      if (currentType === 'weekly') label = 'TÝDENNÍ';
-      if (currentType === 'monday') label = 'PONDĚLÍ';
-      if (currentType === 'wednesday') label = 'STŘEDA';
-      if (currentType === 'thursday') label = 'ČTVRTEK';
-
-      if (confirm(`Opravdu vynulovat data pouze pro ${label} inventuru?`)) {
-        logData[currentType] = [];
-        saveData();
-        renderTable();
-      }
-    }
-
-    function setMode(mode) {
-      isSubtractionMode = (mode === 'sub');
-      document.body.className = isSubtractionMode ? 'mode-sub' : 'mode-add';
-      updateOkButtonsText();
-    }
-
-    function updateOkButtonsText() {
-      const txt = isSubtractionMode ? "-" : "OK";
-      document.querySelectorAll('.btn-ok').forEach(b => b.textContent = txt);
-    }
-
-    // Inicializace
-    switchListType(currentType);
-
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
