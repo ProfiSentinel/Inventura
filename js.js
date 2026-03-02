@@ -26,48 +26,9 @@ const resizeObserver = new ResizeObserver(entries => {
 if(stickyWrapper) resizeObserver.observe(stickyWrapper);
 
 // --- DATA ---
+// Výchozí prázdný seznam - uživatel si ho upraví přes tlačítko "✏️ Seznam"
 const defaultItems = [
-  "C-Mlekalprosoya", "4:1 Maso", "10:1 Maso", "Maso Filet O Fi", 
-  "Slanina Dlouha", "Slaninove Kousk", "Tasticka Jablko", "Tasticka Boruvk", 
-  "English Muffin", "Zemle Bagel", "Pork Maso", "Hashbrown", 
-  "Tortilla 20cm", "Tortilla 25cm", "Livance 40ks", "Bez Lepku Zemle", 
-  "Kureci Nugety", "Hermelinky", "Smazeny Syr Eid", "Rosti Patty", 
-  "Grilled Kureci Maso", "Maso Value Chicken", "Maso Kureci McCrispy", 
-  "Stripsy Kureci", "Maso Kureci Str", "Premiere Chicken", "Maso Premier Ch", 
-  "Hranolky 12.5kg", "Omacka Guacamol", "ZemleSyrSla2x2", "Zemle McCrispy", 
-  "Zemle BM Best Burger", "Zemle QP Best Burger", "Zemle RG Best Burger", 
-  "Nudlicky Sun. Chlaz.", "Platky Sunka Chlaz.", "Lucina Kremova", "Maslo Meggle", 
-  "Rucola", "Okurky Krajene", "Cibule Cerstva", "Okurky Nakladane", 
-  "Pribinacek 15x0,125", "Omacka FF 830ks", "Kecup Porcovany", "Cherry Rajcata", 
-  "Rajcata Krajena", "Kecup 10 L", "Kit Kat Posypka", "Lotus Posypka", 
-  "Lentilky Mini", "Jalapenos Papricky", "Salatova Smes S", "Salat Batavia", 
-  "Shake Mix", "Sundae Mix", "Sladkokysely Dip 125", "Omacka Habanero", 
-  "Omacka Dorblu 6", "Strouhany Cheddar", "Syr Cheddar Platky", "Syr White Chedd", 
-  "Vanilka Sirup 12 kg", "Coko Sirup 12 kg", "Jahoda Sirup 12 kg", "Coko Poleva", 
-  "Karamel Poleva", "Jahoda Poleva", "BM Omacka", "Sandwich Omacka", 
-  "Tasty Omacka", "Sweet-Chilli Omacka", "Omacka Carolina BBQ", "Omacka Med&Horc", 
-  "Omacka Creamy B", "Omacka Cheddar", "Omacka Big Rost", "Vejce Cerstva", 
-  "Horcice 15 kg", "Hellmans Tatarka", "Koktejlova Zalivka", "Ceasar Zalivka", 
-  "Jogurtova Zalivka", "Syrova Zalivka", "Zalivka Olivovy Olej", "Zalivka Balsamico", 
-  "Omacka Tartar", "Omacka Cesnek 6", "Omacka Horcice/Bazal", "Omacka Tomato/Oregan", 
-  "Kari Dip 125 ks", "BBQ Dip 125ks", "Omacka Barbecue", "Omacka Swiss K", 
-  "BrusinkovaOmac", "Dip Chilli-Lemon 125", "Horcicovy Dip 125ks", "Omacka Marinara", 
-  "Deluxe Omacka", "Salat BM", "Rajec Neperlivy", "Rajec Jemne Perlivy", 
-  "Pomeranc Dzus Chlaz.", "Jablecny Dzus Chlaz.", "Friends-Collect", "Friends-Hrnek 3", 
-  "Tuk Tekuty 15L", "Zero Coca Cola 5L", "Cola 20 Litru", "Lipton IceTea 10 Lit", 
-  "Sprite 5 Litru", "Fanta 5 Litru", "Box Filet Fish", "Krutony Salatove", 
-  "Susena Cibule", "Cibule Smazena", "Kornout Zmrzlinovy", "C-Bezkofeinkava", 
-  "C-Vanilla Prase", "Sipkovy Lipton Caj", "Matovy Lipton Caj", "Zeleny Lipton Caj", 
-  "English Br. Lipton", "C-Kokos Prichut", "Vanilka Prichut", "Sirup Toasted M", 
-  "C-Coko Prichut", "C-Karamel Prichut", "Orisek Prichut", "Kava Espresso 6", 
-  "C-Horka Cokolada", "C-Cukr Hnedy", "Cukr Bily", "C-Citrony 1kg", 
-  "Smetana 240x10g", "Smetana 1L", "Jahoda Dzem", "Nutella", 
-  "Merunka Dzem", "Citronstava 100", "Med Kvetovany 8", "C-Mleko Ovesne", 
-  "C-Mleko Bezlakt", "C-Mleko 3,5%", "C-Croissant", "C-Cokoladova Ko", 
-  "C-Jahoda Cheesecake", "C-Jablecny Dort Kara", "C-Misa Rez 48ks", "C-Bananchleb", 
-  "Srdicko 532ks", "Muffin Tresen 1", "C-Cheese Cake", "C-Dort Mrkvovy", 
-  "Koblizky Mini M", "C-Nugat Koblizky", "C-Triple Cookies", "Koblizek Dubai", 
-  "C-Cookie Choc C"
+  "Položka 1"
 ];
 
 let currentType = localStorage.getItem("currentListType_v5") || 'daily';
@@ -244,6 +205,12 @@ function closeSearch() {
 
 searchInput.addEventListener('input', (e) => filterItems(e.target.value));
 
+// --- NOVÉ: Vymazání pole při kliknutí ---
+searchInput.addEventListener('focus', function() {
+  this.value = ''; 
+  filterItems(''); 
+});
+
 function filterItems(query) {
   const rows = document.querySelectorAll('#inventoryTable tr');
   const lowerQuery = query.toLowerCase();
@@ -367,7 +334,6 @@ function setMode(mode) {
 }
 
 function updateOkButtonsText() {
-  // Při sčítání je text OK, při odčítání je krásná ikonka minusu
   const btnContent = isSubtractionMode ? '<i class="fas fa-minus"></i>' : "OK";
   document.querySelectorAll('.btn-ok').forEach(b => b.innerHTML = btnContent);
 }
