@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
-  <title>Inventura: Denní/Týdenní/Středa/Čtvrtek</title>
+  <title>Inventura: Denní/Týdenní/Pondělí/Středa/Čtvrtek</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     :root {
@@ -36,7 +36,7 @@
     
     .list-tabs { display: flex; background: #bdc3c7; }
     .tab-btn {
-      flex: 1; padding: 12px 2px; text-align: center; font-weight: bold; font-size: 12px; /* Zmenšeno písmo aby se vešly 4 tlačítka */
+      flex: 1; padding: 12px 1px; text-align: center; font-weight: bold; font-size: 11px; /* Zmenšeno písmo aby se vešlo 5 tlačítek */
       cursor: pointer; background: var(--inactive-tab); color: #7f8c8d;
       border: none; outline: none; transition: all 0.2s;
       border-right: 1px solid #dcdcdc;
@@ -171,6 +171,7 @@
     <div class="list-tabs">
       <button class="tab-btn active" id="tab-daily" onclick="switchListType('daily')">DENNÍ</button>
       <button class="tab-btn" id="tab-weekly" onclick="switchListType('weekly')">TÝDENNÍ</button>
+      <button class="tab-btn" id="tab-monday" onclick="switchListType('monday')">PONDĚLÍ</button>
       <button class="tab-btn" id="tab-wednesday" onclick="switchListType('wednesday')">STŘEDA</button>
       <button class="tab-btn" id="tab-thursday" onclick="switchListType('thursday')">ČTVRTEK</button>
     </div>
@@ -280,28 +281,58 @@
     resizeObserver.observe(stickyWrapper);
 
 
-    // --- DATA (AKTUALIZOVANÁ) ---
+    // --- DATA ---
     const defaultItems = [
-      "4:1 Maso", "10:1 Maso", "Slanina Dlouha", "Tortilla 20cm", 
-      "Tortilla 25cm", "Kureci Nugety", "Hermelinky", "Rosti Patty", 
+      "C-Mlekalprosoya", "4:1 Maso", "10:1 Maso", "Maso Filet O Fi", 
+      "Slanina Dlouha", "Slaninove Kousk", "Tasticka Jablko", "Tasticka Boruvk", 
+      "English Muffin", "Zemle Bagel", "Pork Maso", "Hashbrown", 
+      "Tortilla 20cm", "Tortilla 25cm", "Livance 40ks", "Bez Lepku Zemle", 
+      "Kureci Nugety", "Hermelinky", "Smazeny Syr Eid", "Rosti Patty", 
       "Grilled Kureci Maso", "Maso Value Chicken", "Maso Kureci McCrispy", 
-      "Stripsy Kureci", "Premiere Chicken", "Hranolky 12.5kg", 
-      "Omacka Guacamol", "Zemle Syr Sla 2x2", "Zemle McCrispy", 
+      "Stripsy Kureci", "Maso Kureci Str", "Premiere Chicken", "Maso Premier Ch", 
+      "Hranolky 12.5kg", "Omacka Guacamol", "ZemleSyrSla2x2", "Zemle McCrispy", 
       "Zemle BM Best Burger", "Zemle QP Best Burger", "Zemle RG Best Burger", 
-      "Rucola", "Cibule Cerstva", "Rajcata Krajena", "Salatova Smes S", 
-      "Salat Batavia", "Shake Mix", "Sundae Mix", "Omacka Habanero", 
-      "Omacka Dorblu 6", "Strouhany Cheddar", "Syr Cheddar Platky", 
-      "Syr White Chedd", "Omacka Med&Horc", "Omacka Creamy B", 
-      "Vejce Cerstva", "Omacka Swiss K", "Salat BM", "Friends-Collect", 
-      "Friends-Hrnek 3", "Kava Espresso 6", "C-Mleko 3,5%", "Rukavice Uklid"
+      "Nudlicky Sun. Chlaz.", "Platky Sunka Chlaz.", "Lucina Kremova", "Maslo Meggle", 
+      "Rucola", "Okurky Krajene", "Cibule Cerstva", "Okurky Nakladane", 
+      "Pribinacek 15x0,125", "Omacka FF 830ks", "Kecup Porcovany", "Cherry Rajcata", 
+      "Rajcata Krajena", "Kecup 10 L", "Kit Kat Posypka", "Lotus Posypka", 
+      "Lentilky Mini", "Jalapenos Papricky", "Salatova Smes S", "Salat Batavia", 
+      "Shake Mix", "Sundae Mix", "Sladkokysely Dip 125", "Omacka Habanero", 
+      "Omacka Dorblu 6", "Strouhany Cheddar", "Syr Cheddar Platky", "Syr White Chedd", 
+      "Vanilka Sirup 12 kg", "Coko Sirup 12 kg", "Jahoda Sirup 12 kg", "Coko Poleva", 
+      "Karamel Poleva", "Jahoda Poleva", "BM Omacka", "Sandwich Omacka", 
+      "Tasty Omacka", "Sweet-Chilli Omacka", "Omacka Carolina BBQ", "Omacka Med&Horc", 
+      "Omacka Creamy B", "Omacka Cheddar", "Omacka Big Rost", "Vejce Cerstva", 
+      "Horcice 15 kg", "Hellmans Tatarka", "Koktejlova Zalivka", "Ceasar Zalivka", 
+      "Jogurtova Zalivka", "Syrova Zalivka", "Zalivka Olivovy Olej", "Zalivka Balsamico", 
+      "Omacka Tartar", "Omacka Cesnek 6", "Omacka Horcice/Bazal", "Omacka Tomato/Oregan", 
+      "Kari Dip 125 ks", "BBQ Dip 125ks", "Omacka Barbecue", "Omacka Swiss K", 
+      "BrusinkovaOmac", "Dip Chilli-Lemon 125", "Horcicovy Dip 125ks", "Omacka Marinara", 
+      "Deluxe Omacka", "Salat BM", "Rajec Neperlivy", "Rajec Jemne Perlivy", 
+      "Pomeranc Dzus Chlaz.", "Jablecny Dzus Chlaz.", "Friends-Collect", "Friends-Hrnek 3", 
+      "Tuk Tekuty 15L", "Zero Coca Cola 5L", "Cola 20 Litru", "Lipton IceTea 10 Lit", 
+      "Sprite 5 Litru", "Fanta 5 Litru", "Box Filet Fish", "Krutony Salatove", 
+      "Susena Cibule", "Cibule Smazena", "Kornout Zmrzlinovy", "C-Bezkofeinkava", 
+      "C-Vanilla Prase", "Sipkovy Lipton Caj", "Matovy Lipton Caj", "Zeleny Lipton Caj", 
+      "English Br. Lipton", "C-Kokos Prichut", "Vanilka Prichut", "Sirup Toasted M", 
+      "C-Coko Prichut", "C-Karamel Prichut", "Orisek Prichut", "Kava Espresso 6", 
+      "C-Horka Cokolada", "C-Cukr Hnedy", "Cukr Bily", "C-Citrony 1kg", 
+      "Smetana 240x10g", "Smetana 1L", "Jahoda Dzem", "Nutella", 
+      "Merunka Dzem", "Citronstava 100", "Med Kvetovany 8", "C-Mleko Ovesne", 
+      "C-Mleko Bezlakt", "C-Mleko 3,5%", "C-Croissant", "C-Cokoladova Ko", 
+      "C-Jahoda Cheesecake", "C-Jablecny Dort Kara", "C-Misa Rez 48ks", "C-Bananchleb", 
+      "Srdicko 532ks", "Muffin Tresen 1", "C-Cheese Cake", "C-Dort Mrkvovy", 
+      "Koblizky Mini M", "C-Nugat Koblizky", "C-Triple Cookies", "Koblizek Dubai", 
+      "C-Cookie Choc C"
     ];
 
     let currentType = localStorage.getItem("currentListType_v5") || 'daily';
 
-    // Inicializace pro všechny ČTYŘI typy
+    // Inicializace pro všechny PĚT typů
     let listData = {
       daily: JSON.parse(localStorage.getItem("inventoryList_daily_v5")) || [...defaultItems],
       weekly: JSON.parse(localStorage.getItem("inventoryList_weekly_v5")) || [...defaultItems],
+      monday: JSON.parse(localStorage.getItem("inventoryList_monday_v5")) || [...defaultItems],
       wednesday: JSON.parse(localStorage.getItem("inventoryList_wednesday_v5")) || [...defaultItems],
       thursday: JSON.parse(localStorage.getItem("inventoryList_thursday_v5")) || [...defaultItems]
     };
@@ -309,6 +340,7 @@
     let logData = {
       daily: JSON.parse(localStorage.getItem("inventoryLogs_daily_v5")) || [],
       weekly: JSON.parse(localStorage.getItem("inventoryLogs_weekly_v5")) || [],
+      monday: JSON.parse(localStorage.getItem("inventoryLogs_monday_v5")) || [],
       wednesday: JSON.parse(localStorage.getItem("inventoryLogs_wednesday_v5")) || [],
       thursday: JSON.parse(localStorage.getItem("inventoryLogs_thursday_v5")) || []
     };
@@ -332,6 +364,7 @@
       // Update Title
       let titleLabel = 'DENNÍ';
       if (type === 'weekly') titleLabel = 'TÝDENNÍ';
+      if (type === 'monday') titleLabel = 'PONDĚLÍ';
       if (type === 'wednesday') titleLabel = 'STŘEDA';
       if (type === 'thursday') titleLabel = 'ČTVRTEK';
       
@@ -542,6 +575,7 @@
     function openEditListModal() {
       let title = 'Denní';
       if (currentType === 'weekly') title = 'Týdenní';
+      if (currentType === 'monday') title = 'Pondělí';
       if (currentType === 'wednesday') title = 'Středa';
       if (currentType === 'thursday') title = 'Čtvrtek';
       
@@ -558,6 +592,7 @@
       
       let title = 'Denní';
       if (currentType === 'weekly') title = 'Týdenní';
+      if (currentType === 'monday') title = 'Pondělí';
       if (currentType === 'wednesday') title = 'Středa';
       if (currentType === 'thursday') title = 'Čtvrtek';
 
@@ -573,6 +608,7 @@
     function resetInventory() {
       let label = 'DENNÍ';
       if (currentType === 'weekly') label = 'TÝDENNÍ';
+      if (currentType === 'monday') label = 'PONDĚLÍ';
       if (currentType === 'wednesday') label = 'STŘEDA';
       if (currentType === 'thursday') label = 'ČTVRTEK';
 
