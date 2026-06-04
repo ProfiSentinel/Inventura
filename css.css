@@ -17,12 +17,24 @@ body {
   padding: 0; margin: 0; background: var(--bg); color: #333; padding-bottom: 80px;
 }
 
-/* --- STATICKÁ HLAVIČKA --- */
+/* --- STATICKÁ HLAVIČKA VČETNĚ SCROLL MENU --- */
 header { background: #fff; position: relative; z-index: 101; }
 
-.list-tabs { display: flex; background: #bdc3c7; }
+/* Posuvné lišty pro záložky na mobilu */
+.list-tabs { 
+  display: flex; 
+  background: #bdc3c7; 
+  overflow-x: auto; /* Povolí vodorovný posun */
+  white-space: nowrap; /* Zabrání tlačítkům skočit na nový řádek */
+  -webkit-overflow-scrolling: touch; /* Hladký setrvačný scroll na iOS */
+}
+.list-tabs::-webkit-scrollbar {
+  display: none; /* Skryje posuvník na mobilech pro čistější vzhled */
+}
+
 .tab-btn {
-  flex: 1; padding: 12px 1px; text-align: center; font-weight: bold; font-size: 11px;
+  flex: 0 0 auto; /* Tlačítka drží svou velikost a nemačkají se */
+  padding: 14px 18px; text-align: center; font-weight: bold; font-size: 12px;
   cursor: pointer; background: var(--inactive-tab); color: #7f8c8d;
   border: none; outline: none; transition: all 0.2s; border-right: 1px solid #dcdcdc;
 }
