@@ -26,28 +26,35 @@ const resizeObserver = new ResizeObserver(entries => {
 if(stickyWrapper) resizeObserver.observe(stickyWrapper);
 
 // --- DATA ---
-// Výchozí prázdný seznam - uživatel si ho upraví přes tlačítko "✏️ Seznam"
 const defaultItems = [
   "Položka 1"
 ];
 
-let currentType = localStorage.getItem("currentListType_v5") || 'daily';
-
-let listData = {
-  daily: JSON.parse(localStorage.getItem("inventoryList_daily_v5")) || [...defaultItems],
-  weekly: JSON.parse(localStorage.getItem("inventoryList_weekly_v5")) || [...defaultItems],
-  monday: JSON.parse(localStorage.getItem("inventoryList_monday_v5")) || [...defaultItems],
-  wednesday: JSON.parse(localStorage.getItem("inventoryList_wednesday_v5")) || [...defaultItems],
-  thursday: JSON.parse(localStorage.getItem("inventoryList_thursday_v5")) || [...defaultItems]
+// Překladové slovníky pro dny v týdnu
+const typeLabels = {
+  monday: 'PONDĚLÍ', tuesday: 'ÚTERÝ', wednesday: 'STŘEDA',
+  thursday: 'ČTVRTEK', friday: 'PÁTEK', saturday: 'SOBOTA', sunday: 'NEDĚLE'
+};
+const typeLabelsLower = {
+  monday: 'Pondělí', tuesday: 'Úterý', wednesday: 'Středa',
+  thursday: 'Čtvrtek', friday: 'Pátek', saturday: 'Sobota', sunday: 'Neděle'
 };
 
-let logData = {
-  daily: JSON.parse(localStorage.getItem("inventoryLogs_daily_v5")) || [],
-  weekly: JSON.parse(localStorage.getItem("inventoryLogs_weekly_v5")) || [],
-  monday: JSON.parse(localStorage.getItem("inventoryLogs_monday_v5")) || [],
-  wednesday: JSON.parse(localStorage.getItem("inventoryLogs_wednesday_v5")) || [],
-  thursday: JSON.parse(localStorage.getItem("inventoryLogs_thursday_v5")) || []
-};
+let currentType = localStorage.getItem("currentListType_v5") || 'monday';
+
+// Ochrana pro případ, že má někdo v telefonu uloženou starou záložku mimo rozsah 7 dnů
+if (!typeLabels[currentType]) {
+    currentType = 'monday';
+}
+
+// Inicializace úložiště pro 7 dnů
+let listData = {};
+let logData = {};
+
+Object.keys(typeLabels).forEach(type => {
+  listData[type] = JSON.parse(localStorage.getItem(`inventoryList_${type}_v5`)) || [...defaultItems];
+  logData[type] = JSON.parse(localStorage.getItem(`inventoryLogs_${type}_v5`)) || [];
+});
 
 let isSubtractionMode = false;
 const unitNames = { 'pack': 'Balení', 'bag': 'Sáčky', 'pcs': 'Kusy' };
@@ -62,14 +69,13 @@ function switchListType(type) {
   localStorage.setItem("currentListType_v5", type);
   
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + type).classList.add('active');
+  const activeTab = document.getElementById('tab-' + type);
+  if (activeTab) {
+    activeTab.classList.add('active');
+    activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
 
-  let titleLabel = 'DENNÍ';
-  if (type === 'weekly') titleLabel = 'TÝDENNÍ';
-  if (type === 'monday') titleLabel = 'PONDĚLÍ';
-  if (type === 'wednesday') titleLabel = 'STŘEDA';
-  if (type === 'thursday') titleLabel = 'ČTVRTEK';
-  
+  let titleLabel = typeLabels[type] || 'PONDĚLÍ';
   document.getElementById('pageTitle').textContent = `${titleLabel} INVENTURA`;
 
   closeSearch();
@@ -205,7 +211,6 @@ function closeSearch() {
 
 searchInput.addEventListener('input', (e) => filterItems(e.target.value));
 
-// --- NOVÉ: Vymazání pole při kliknutí ---
 searchInput.addEventListener('focus', function() {
   this.value = ''; 
   filterItems(''); 
@@ -281,12 +286,7 @@ function editLogEntry(id) {
 
 // --- EDITACE SEZNAMU ---
 function openEditListModal() {
-  let title = 'Denní';
-  if (currentType === 'weekly') title = 'Týdenní';
-  if (currentType === 'monday') title = 'Pondělí';
-  if (currentType === 'wednesday') title = 'Středa';
-  if (currentType === 'thursday') title = 'Čtvrtek';
-  
+  let title = typeLabelsLower[currentType] || 'Pondělí';
   document.getElementById('editModalTitle').innerHTML = `<i class="fas fa-list" style="margin-right: 5px;"></i> Editace: ${title}`;
   document.getElementById("itemsTextarea").value = listData[currentType].join("\n");
   document.getElementById("listModal").style.display = "flex";
@@ -298,11 +298,7 @@ function saveNewList() {
   
   if (newItems.length === 0) { alert("Seznam nesmí být prázdný"); return; }
   
-  let title = 'Denní';
-  if (currentType === 'weekly') title = 'Týdenní';
-  if (currentType === 'monday') title = 'Pondělí';
-  if (currentType === 'wednesday') title = 'Středa';
-  if (currentType === 'thursday') title = 'Čtvrtek';
+  let title = typeLabelsLower[currentType] || 'Pondělí';
 
   if (confirm(`Uložit nové uspořádání pro ${title} seznam?`)) {
     listData[currentType] = newItems;
@@ -314,12 +310,7 @@ function saveNewList() {
 
 // --- RESET A MODES ---
 function resetInventory() {
-  let label = 'DENNÍ';
-  if (currentType === 'weekly') label = 'TÝDENNÍ';
-  if (currentType === 'monday') label = 'PONDĚLÍ';
-  if (currentType === 'wednesday') label = 'STŘEDA';
-  if (currentType === 'thursday') label = 'ČTVRTEK';
-
+  let label = typeLabels[currentType] || 'PONDĚLÍ';
   if (confirm(`Opravdu vynulovat všechna data pro ${label} inventuru? (Smaže se i historie úprav)`)) {
     logData[currentType] = [];
     saveData();
