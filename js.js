@@ -99,15 +99,15 @@ function renderTable() {
     row.innerHTML = `
       <td class="item-name" onclick="openHistory('${item}')">${item}</td>
       <td>
-        <input type="number" inputmode="decimal" class="qty-input" id="${item}-pack">
+        <input type="number" step="any" inputmode="decimal" class="qty-input" id="${item}-pack">
         <span class="total-display" id="${item}-pack-total">${t.pack}</span>
       </td>
       <td>
-        <input type="number" inputmode="decimal" class="qty-input" id="${item}-bag">
+        <input type="number" step="any" inputmode="decimal" class="qty-input" id="${item}-bag">
         <span class="total-display" id="${item}-bag-total">${t.bag}</span>
       </td>
       <td>
-        <input type="number" inputmode="decimal" class="qty-input" id="${item}-pcs">
+        <input type="number" step="any" inputmode="decimal" class="qty-input" id="${item}-pcs">
         <span class="total-display" id="${item}-pcs-total">${t.pcs}</span>
       </td>
       <td><button class="btn-ok" onclick="updateItem('${item}')">OK</button></td>
@@ -135,6 +135,14 @@ function calculateTotals(items, logs) {
       totals[log.item][log.unit] += log.val;
     }
   });
+
+  // Ošetření nepřesností plovoucí řádové čárky v JS (např. 0.1 + 0.2)
+  items.forEach(i => {
+    ['pack', 'bag', 'pcs'].forEach(u => {
+      totals[i][u] = Math.round(totals[i][u] * 1000) / 1000;
+    });
+  });
+
   return totals;
 }
 
@@ -145,7 +153,9 @@ function updateItem(item) {
 
   inputs.forEach(unit => {
     const inputEl = document.getElementById(`${item}-${unit}`);
-    let val = parseFloat(inputEl.value);
+    let valStr = inputEl.value.replace(',', '.');
+    let val = parseFloat(valStr);
+
     if (!isNaN(val)) {
       if (isSubtractionMode) val = -val;
       
@@ -171,6 +181,10 @@ function refreshSingleItemDisplay(item) {
   let t = { pack: 0, bag: 0, pcs: 0 };
   logData[currentType].filter(l => l.item === item).forEach(l => t[l.unit] += l.val);
   
+  ['pack', 'bag', 'pcs'].forEach(u => {
+    t[u] = Math.round(t[u] * 1000) / 1000;
+  });
+
   document.getElementById(`${item}-pack-total`).textContent = t.pack;
   document.getElementById(`${item}-bag-total`).textContent = t.bag;
   document.getElementById(`${item}-pcs-total`).textContent = t.pcs;
@@ -272,11 +286,11 @@ function deleteLogEntry(id) {
 function editLogEntry(id) {
   const log = logData[currentType].find(l => l.id === id);
   if (!log) return;
-  const newVal = prompt("Zadej novou hodnotu (např. 5 nebo -2):", log.val);
+  const newVal = prompt("Zadej novou hodnotu (např. 5,5 nebo -2.1):", log.val);
   if (newVal !== null) {
-    const p = parseFloat(newVal);
-    if (!isNaN(p)) {
-      log.val = p;
+    const parsedVal = parseFloat(newVal.replace(',', '.'));
+    if (!isNaN(parsedVal)) {
+      log.val = parsedVal;
       saveData();
       renderHistoryList();
       refreshSingleItemDisplay(historyTargetItem);
